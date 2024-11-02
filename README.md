@@ -1,5 +1,9 @@
-# 👨‍🏫 cursor-rules
-collection of rules to use with cursor ai
+# 👨‍🏫 cursor-prompts
+collection of prompts and `.cursorrules` to use with cursor ai
+
+## Prompts
+
+Prompts are fundamental instructions that you use often to start projects, update functionality, write documentation, etc.
 
 ## Global Rules
 
