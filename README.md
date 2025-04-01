@@ -26,7 +26,10 @@ Global rules are used to:
 
 ---
 
-### [Cursor Rules Documentation](https://docs.cursor.com/context/rules-for-ai)
-### `_example .cursor folder/.cursor/rules/`
-- example `.cursor/rules/` folder setup
-- for using the "mode" rules, ask the agent to "Enter Planning Mode" or "Enter Security Mode"
+## 📗 Links and other Info
+- [Cursor Rules Documentation](https://docs.cursor.com/context/rules-for-ai)
+- [ctxs.ai](https://ctxs.ai/weekly) ⇢ collection of great AI Prompts
+- [cursor.directory](https://cursor.directory/) ⇢ the original web directory of cursor rules
+- `_example .cursor folder/.cursor/rules/`
+  - example `.cursor/rules/` folder setup
+  - for using the `mode` rules, ask the agent to "_Enter Planning Mode_" or "_Enter Security Mode_"
