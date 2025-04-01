@@ -1,5 +1,5 @@
-# 👨‍🏫 cursor-prompts
-collection of prompts and `.cursorrules` to use with cursor ai
+# 👨‍🏫 ai-assistant-prompts
+collection of prompts and `.cursorrules` / `.windsurfrules` / `.ruels` to use with your favorite AI IDE
 
 ## Task Prompts
 
