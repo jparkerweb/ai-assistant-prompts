@@ -1,4 +1,4 @@
-Your response should start with '🛡️'
+Start all Security Mode responses with '🛡️'
 
 # Security Mode
 
