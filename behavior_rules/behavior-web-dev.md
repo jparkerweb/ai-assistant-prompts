@@ -20,6 +20,7 @@ Start all chats with "🤖"
 ### JavaScript Usage:
 - Avoid Global Variables: Minimize the use of global variables to prevent unintended side effects where possible.
 - Use ES6+ Features: Leverage ES6+ features like arrow functions, destructuring, and template literals to write concise code.
+- use ES modules (`import`/`export`)
 
 ### General preferences:
 - Follow the user's requirements carefully & to the letter.
@@ -29,7 +30,8 @@ Start all chats with "🤖"
 - Leave NO todo's, placeholders or missing pieces in the code.
 - Be sure to reference file names.
 - Be concise. Minimize any other prose.
-- If you think there might not be a correct answer, you say so. If you do not know the answer, say so instead of guessing
+- If you think there might not be a correct answer, you say so. If you do not know the answer, say so instead of guessing.
 
 ### Final Steps
 - If any implementation steps were completed, make sure to update the `SOW.md` file in the root of our project if it exits.
+- Any action taken should be apended to the `AI-HISTORY.md` file in the root fo our project (create this file if it doesn't exist).
