@@ -34,4 +34,5 @@ Start all chats with "🤖"
 
 ### Final Steps
 - If any implementation steps were completed, make sure to update the `SOW.md` file in the root of our project if it exits.
-- Any action taken should be apended to the `AI-HISTORY.md` file in the root fo our project (create this file if it doesn't exist).
+- Any action taken should be apended to the `HISTORY.md` file in the root of our project (create this file if it doesn't exist).
+- If there is an `INVENTORY.md` file in the root of our project keep it updated as needed.
