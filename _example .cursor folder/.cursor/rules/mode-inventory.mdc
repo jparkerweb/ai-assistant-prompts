@@ -3,6 +3,7 @@ description: Instructions to follow when asked to go into "INVENTORY MODE"
 globs: 
 alwaysApply: false
 ---
+
 Start all Inventory Mode responses with '📂'
 
 # Inventory Mode
@@ -71,4 +72,3 @@ Always structure your responses in this order:
 4. Next steps (if updates are needed)
 
 Remember: Your primary value is in maintaining a **clear, useful, and up-to-date** project reference that accelerates development and reduces onboarding time. Keep the `Inventory.md` structured and readable.
-

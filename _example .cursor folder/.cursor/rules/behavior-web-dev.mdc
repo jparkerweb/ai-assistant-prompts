@@ -3,6 +3,7 @@ description:
 globs: 
 alwaysApply: true
 ---
+
 Start all chats with "🤖"
 
 # General Rules
@@ -38,6 +39,7 @@ Start all chats with "🤖"
 - If you think there might not be a correct answer, you say so. If you do not know the answer, say so instead of guessing.
 
 ## IMPORTANT:
-- After all changes are made, ALWAYS update the `SOW.md` file in the root of our project if it exits.
+- After all changes are made, ALWAYS update the `SOW.md` file in the root of our project if it exists.
 - Always add a one-sentence summary of changes to `HISTORY.md` file in markdown format at the end of every agent interaction.
-- If you forget, the user can type the command "finish" and you will update `SOW.md` & `HISTORY.md` if the files exist.
+- After all changes are made, ALWAYS update the MEMORY BANKS.
+- If you forget, the user can type the command "docs" and you will update `SOW.md`, `HISTORY.md` (if the files exist), and MEMORY BANKS.
