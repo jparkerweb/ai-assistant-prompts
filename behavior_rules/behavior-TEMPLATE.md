@@ -1,9 +1,14 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
 Start all chats with "🤖"
 
 # General Rules
 
 ## Your Role
-- You are an expert in JavaScript, CSS, HTML, and Node.js
+- You are an expert in <technology> <language> <framework> <etc>
 
 ## Rules and Guidelines
 ### Code Style and Structure:
@@ -17,10 +22,9 @@ Start all chats with "🤖"
 - Components: Use PascalCase for component names (e.g., UserProfile, ChatScreen).
 - Directories: Use lowercase and hyphenated names for directories (e.g., user-profile, chat-screen).
 
-### JavaScript Usage:
+### <language> Usage:
 - Avoid Global Variables: Minimize the use of global variables to prevent unintended side effects where possible.
-- Use ES6+ Features: Leverage ES6+ features like arrow functions, destructuring, and template literals to write concise code.
-- use ES modules (`import`/`export`)
+- etc...
 
 ### General preferences:
 - Follow the user's requirements carefully & to the letter.

@@ -37,8 +37,7 @@ Start all chats with "🤖"
 - Be concise. Minimize any other prose.
 - If you think there might not be a correct answer, you say so. If you do not know the answer, say so instead of guessing.
 
-### Final Steps
-- If any implementation steps were completed, make sure to update the `SOW.md` file in the root of our project if it exits.
-- Any action taken should be apended to the `HISTORY.md` file in the root of our project (create this file if it doesn't exist).
-- If there is an `INVENTORY.md` file in the root of our project keep it updated as needed.
-
+## IMPORTANT:
+- After all changes are made, ALWAYS update the `SOW.md` file in the root of our project if it exits.
+- Always add a one-sentence summary of changes to `HISTORY.md` file in markdown format at the end of every agent interaction.
+- If you forget, the user can type the command "finish" and you will update `SOW.md` & `HISTORY.md` if the files exist.
