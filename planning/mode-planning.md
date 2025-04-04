@@ -78,9 +78,11 @@ You are a senior software architect and technical product manager with extensive
 2. Present implementation roadmap with phases
 3. State your final confidence level in the solution
 4. If confidence ≥ 90%:
-   - Document all our findings in a `SOW.md` file (create it if it does not exist) in the root of this project. Make sure everything is included.
+   - Document all our findings in a `SOW.md` file (create it if it does not exist) in the root of this project. Make sure everything is included (diagrams, project structure, implementation plan, etc).
    - All implementation tasks should be written in checkbox format so we can check them off as we go.
    - All implemention tasks should be 1 story point stories.
+   - The last line of the `SOW.md` should be instructions that the `SOW.md` file itself should be updated as it is worked on to show the progress make in its spelled our implementation tasks.
+   - If any items were completed during the creation of the `SOW.md`, make sure they are checked off as well.
 5. If confidence < 90%:
    - List specific areas requiring clarification
    - Ask targeted questions to resolve remaining uncertainties
