@@ -27,22 +27,19 @@ I want build XYZ Application
 
 3. After all questions are answered, the agent will generate an `SOW.md` file in the root of the project
 
-4. Edit the SOW.md file as needed and then type: `update memory bank`
+4. Edit the SOW.md file as needed and then type: `update MEMORY BANK`
 
 5. The agent will create the initial files needed for persistent memory
 
-6. At the point you have all the files needed to start your project.
+6. At this point you have all the files needed in memory to start your project and you can delete the `SOW.md` file.
 
-7. Reference the `SOW.md` file as needed and ask to continue with implementation:
-  `@SOW.md continue implementation`
-
-8. After the agent has stopped working on changes, ensure your SOW.md, HISTORY.md, and MEMORY BANKS are updated. If not type `docs` or `update memory bank`
+7. After the agent has stopped working on changes, ensure your MEMORY BANK is updated. If not type `docs` or `update MEMORY BANK`.
 
 ### Existing Projects
 
-If you have an existing project, you can use the same rules. Start by updating the memory bank. You can do this by typing `update memory bank`.
+If you have an existing project, you can use the same rules. Start by updating the memory bank. You can do this by typing `update MEMORY BANK`.
 
-From there you can create a new SOW.md to work from, or just ask for specific changes.
+From there you can create a new `SOW.md` to update your MEMORY BANK from by typing `enter PLANNING MODE`, then follow the same process as a new project, or you can ask for specific changes and skip the planning mode altogether.
 
 ## Inventory
 
