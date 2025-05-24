@@ -9,9 +9,9 @@ The refinement prompt rewrites your prompt using those insights.
 💪 Feel free to edit these two prompts as needed. This combo of evaluation then refinement is very powerful!
 
 ## How To Use It (Step-by-step)
-1. *Evaluate*: Paste the first prompt (`1-evaluate.md`) into ChatGPT (or an equivalent LLM), then paste *YOUR* prompt inside triple backticks at the end. When run it will rate your prompt across all the criteria and output a report.
-2. *Refine*: Paste the second prompt (`2-refine.md`). It will processes the previously generated report and use it to craft a new improved version of *YOUR* prompt.
-3. *Repeat*: Repeat this process as many times as needed until you are happy with the results.
+1. **Evaluate**: Paste the first prompt (`1-evaluate.md`) into ChatGPT (or an equivalent LLM), then paste **YOUR** prompt inside triple backticks at the end. When run it will rate your prompt across all the criteria and output a report.
+2. **Refine**: Paste the second prompt (`2-refine.md`). It will processes the previously generated report and use it to craft a new improved version of *YOUR* prompt.
+3. **Repeat**: Repeat this process as many times as needed until you are happy with the results.
 
 
 ---
