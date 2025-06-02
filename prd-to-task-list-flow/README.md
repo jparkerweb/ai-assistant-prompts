@@ -29,11 +29,11 @@ These files might be helpful as a reference: @inventory.md, @code-standards.md, 
 
 
 ### 3. ⚙️ Generate Your Task List from the PRD
-This step will use the previously created PRD (e.g., `<generated-prd>.md`) to generate a detailed, step-by-step implementation plan for your AI Agent to follow.
+This step will use the previously created PRD (e.g., `prd-[feature-name].md`) to generate a detailed, step-by-step implementation plan for your AI Agent to follow.
 *at* reference the `2-generate-tasks-from-prd.mdc` file like so:  
 
 ```
-Create tasks from @<generated-prd>.md by following @2-generate-tasks-from-prd.mdc
+Create tasks from @prd-[feature-name].md by following @2-generate-tasks-from-prd.mdc
 ```
 
 You should now have a well-structured implementation plan in the form of a Task List for your AI agent to follow.
@@ -43,14 +43,13 @@ You should now have a well-structured implementation plan in the form of a Task 
 *at* reference `3-process-task-list.mdc` like so to start working on the tasks:
 
 ```
-Start on task 1.1 and use @3-process-task-list.mdc
+Follow the instruction in @3-process-task-list.mdc to start working on the next uncomplete task (example: [ ] 1.1) in @tasks-[prd-file-name].md
 ```
-*(Note: You typically only need to reference `@3-process-task-list.mdc` for the *first* task. The instructions within it will guide the AI for subsequent tasks unless you start a new chat.)*
+*(Note: You typically only need to reference `@3-process-task-list.mdc` for the *first* task in a "new chat"; The instructions within it will guide the AI for subsequent tasks.)*
 
 The AI will attempt the task and then prompt you to review.
 
-### 5️⃣ Review, Approve, and Progress ✅
-
+### 5. 👁️ Review & Approve
 As the AI completes each task, you review the changes.
 *   If the changes are good, simply reply with "yes" (or a similar affirmative) to instruct the AI to mark the task complete and move to the next one.
 *   If changes are needed, provide feedback to the AI to correct the current task before moving on.
