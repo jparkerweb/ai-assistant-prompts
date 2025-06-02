@@ -40,19 +40,14 @@ You should now have a well-structured implementation plan in the form of a Task 
 
 
 ### 4. ✨ Work through the Tasks
-To ensure methodical progress and allow for verification, we'll use `process-task-list.mdc`. This command instructs the AI to focus on one task at a time and wait for your go-ahead before moving to the next.
+*at* reference `3-process-task-list.mdc` like so to start working on the tasks:
 
-1.  Create or ensure you have the `process-task-list.mdc` file accessible.
-2.  In Cursor's Agent chat, tell the AI to start with the first task (e.g., `1.1`):
+```
+Start on task 1.1 and use @3-process-task-list.mdc
+```
+*(Note: You typically only need to reference `@3-process-task-list.mdc` for the *first* task. The instructions within it will guide the AI for subsequent tasks unless you start a new chat.)*
 
-    ```
-    Please start on task 1.1 and use @process-task-list.mdc
-    ```
-    *(Important: You only need to reference `@process-task-list.mdc` for the *first* task. The instructions within it guide the AI for subsequent tasks.)*
-
-    The AI will attempt the task and then prompt you to review.
-
-    ![Example of starting on a task with process-task-list.mdc](https://pbs.twimg.com/media/Go6I41KWcAAAlHc?format=jpg&name=medium)
+The AI will attempt the task and then prompt you to review.
 
 ### 5️⃣ Review, Approve, and Progress ✅
 
