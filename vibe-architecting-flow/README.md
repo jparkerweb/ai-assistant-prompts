@@ -1,5 +1,5 @@
 # Vibe Architecting Flow
-The Goal of this series of propts is to creat a well crafted `Statement of Work`, that breaks down your feature into Epics and Stories.
+The Goal of these propts is to creat a well crafted `Statement of Work`, that breaks down your feature into Epics and Stories.
 
 1. Add your "Brainstorming" Notes to the `<brainstorm-document>` tag in `1-deep-research-prep-prompt.md`, then copy/paste that as a prmopt to a capable LLM UI, like Claude or Gemini 2.5 Pro (https://ai.dev/).
 
