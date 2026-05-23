@@ -16,6 +16,8 @@ npx github:jparkerweb/ai-assistant-skills
 
 Skills are installed globally via [skills.sh](https://skills.sh) and auto-detected by 40+ AI agents (Claude Code, Cursor, Windsurf, GitHub Copilot, etc.).
 
+<img src="https://github.com/jparkerweb/ai-assistant-skills/blob/main/ai-assistant-install.jpg?raw=true" style="max-width: 593px;">
+
 ## Local Development
 
 When creating or editing a skill, you need to install it locally to test it **before** committing or pushing. The `skills add` command accepts a local path as the source, so it installs directly from your working tree — no git push required.
