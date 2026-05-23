@@ -1,6 +1,8 @@
 # AI-ASSIST Skills
 
-A collection of AI agent skills that automate recurring engineering workflows. These skills can be installed across multiple AI coding assistants including Claude Code, Cursor, Windsurf, GitHub Copilot, and more.
+<img src="https://github.com/jparkerweb/ai-assistant-skills/blob/main/ai-assistant-skills.jpg?raw=true" alt="banner" style="max-height:300px;">
+
+A collection of AI agent skills that automate recurring engineering workflows that can be installed across multiple AI coding assistants.
 
 ## Installation
 
