@@ -78,6 +78,9 @@ Stages and commits changes using a standard commit message format with an `AI As
 ### [ai-assist-git-pr](skills/ai-assist-git-pr/SKILL.md)
 Adaptive GitHub PR lifecycle — create PRs, generate descriptions, investigate review comments with deep analysis and batch approval, check merge readiness. All via `gh` CLI.
 
+### [ai-assist-npm-update](skills/ai-assist-npm-update/SKILL.md)
+Finds every `package.json` under the current directory, runs `npm outdated`, bumps each outdated dependency to its `^<wanted>` (in-range) version, and runs `npm install`. Supports `--dry-run`.
+
 ### [ai-assist-observability-audit](skills/ai-assist-observability-audit/SKILL.md)
 17-dimension observability posture assessment with tier activation, health scoring, and cost analysis.
 
@@ -199,6 +202,26 @@ The skill will:
 5. **Status:** Report merge readiness — CI checks, review approvals, conflicts, draft status, PR size
 
 All operations use `gh` CLI exclusively. Reads are automatic; writes require preview + explicit approval. Never merges, closes, or force pushes.
+
+### ai-assist-npm-update
+
+Bulk-updates outdated npm dependencies across one or more `package.json` files to their in-range "wanted" versions.
+
+**Usage:**
+
+```
+/ai-assist-npm-update
+/ai-assist-npm-update --dry-run
+```
+
+The skill will:
+
+1. Find every `package.json` under the current directory (skipping `node_modules` and other vendored/output folders)
+2. Run `npm outdated` for each project
+3. Rewrite each outdated dependency's version specifier to `^<wanted>` (the newest version allowed by the existing semver range — not a major-version jump)
+4. Run `npm install` in each updated project to refresh the lockfile
+
+Run with `--dry-run` first to preview every change without writing files or installing.
 
 ### ai-assist-observability-audit
 

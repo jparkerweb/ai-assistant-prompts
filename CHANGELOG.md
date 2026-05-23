@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- **ai-assist-npm-update**: Finds every `package.json` under the current directory, runs `npm outdated`, bumps each outdated dependency to its `^<wanted>` (in-range) version preserving file formatting, and runs `npm install` per updated project. Includes a bundled Node script (`scripts/npm-update.mjs`) with `--dry-run` and `--root` options.
+
 ## [1.0.0] - 2026-05-23
 
 ### Added
