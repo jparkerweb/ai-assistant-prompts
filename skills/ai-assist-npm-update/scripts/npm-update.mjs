@@ -109,9 +109,15 @@ function processProject(pkgPath) {
     return { changed: false, ok: true };
   }
 
-  const raw = readFileSync(pkgPath, "utf8");
+  let raw, pkg;
+  try {
+    raw = readFileSync(pkgPath, "utf8");
+    pkg = JSON.parse(raw);
+  } catch (err) {
+    console.error(`  ✗ ${rel} — could not read or parse: ${err.message}`);
+    return { changed: false, ok: false };
+  }
   const indent = detectIndent(raw);
-  const pkg = JSON.parse(raw);
 
   const changes = [];
   for (const name of names) {

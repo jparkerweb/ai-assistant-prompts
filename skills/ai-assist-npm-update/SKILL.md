@@ -1,7 +1,7 @@
 ---
 name: ai-assist-npm-update
 description: "Bulk-update outdated npm dependencies across one or more package.json files. Finds every package.json in the current working directory (recursively, skipping node_modules), runs npm outdated, bumps each outdated dependency to its 'wanted' version prefixed with ^, then runs npm install. Use whenever the user wants to update npm dependencies, bump packages to their wanted versions, refresh package.json versions, or run npm outdated and apply the results — including across a monorepo or multiple projects at once. Triggers on: update npm packages, update dependencies, bump npm versions, npm outdated, refresh package.json."
-argument-hint: "[--dry-run]"
+argument-hint: "[--dry-run] [--root <path>]"
 ---
 
 # npm Update
@@ -40,7 +40,7 @@ node skills/ai-assist-npm-update/scripts/npm-update.mjs
 
 The script will, for each `package.json` it finds:
 
-1. Run `npm outdated --json` in that project's directory.
+1. Run `npm outdated --json --long` in that project's directory.
 2. For every outdated dependency (across `dependencies`, `devDependencies`, `optionalDependencies`, and `peerDependencies`), rewrite its version specifier to `^<wanted>`.
 3. Write `package.json` back, preserving the original indentation and trailing newline.
 4. Run `npm install` in that directory to update the lockfile and `node_modules`.
@@ -67,4 +67,6 @@ Summarize for the user: which projects were updated, which dependencies were bum
 
 - Requires Node.js and npm on the PATH (the script invokes `npm` directly).
 - Updating to `wanted` stays within existing semver ranges, so it's low-risk — but it still changes lockfiles. After running, suggest the user run their build/tests to confirm nothing broke.
+- Version specifiers are always rewritten as `^<wanted>` regardless of the original form (`~`, exact, `>=`). If specific packages deliberately use `~` or exact pins, review the diff before committing.
+- If the project is a publishable library (has `files` or `publishConfig` in `package.json`), review any `peerDependencies` changes before committing — bumping them changes the declared compatibility range for consumers of your package.
 - This skill does not upgrade to `latest` (major-version) versions. If the user wants major upgrades, that's a different, riskier operation — tell them to use a tool like `npm-check-updates` instead.
