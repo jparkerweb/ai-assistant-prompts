@@ -1,0 +1,3 @@
+# Plaintext source for the encrypted sync-repo skill — must never be committed.
+# The committed, encrypted form lives at .claude/skills/sync-repo/sync-repo.enc
+SYNC.md

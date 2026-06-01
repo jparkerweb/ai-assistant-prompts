@@ -1,0 +1,4 @@
+# The encrypted sync-repo blob is base64 text but must never have its bytes
+# altered by line-ending normalization. Treat it as binary so autocrlf/eol
+# settings can never corrupt the ciphertext.
+*.enc binary
