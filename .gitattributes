@@ -1,3 +1,8 @@
+# Normalize all text files to LF in the repo and on checkout. This repo is
+# made of cross-platform skill definitions and docs, so LF is canonical
+# everywhere and Windows checkouts no longer trigger CRLF warnings.
+* text=auto eol=lf
+
 # The encrypted sync-repo blob is base64 text but must never have its bytes
 # altered by line-ending normalization. Treat it as binary so autocrlf/eol
 # settings can never corrupt the ciphertext.
