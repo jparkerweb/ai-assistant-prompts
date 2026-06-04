@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - **ai-assist-npm-update**: Finds every `package.json` under the current directory, runs `npm outdated`, bumps each outdated dependency to its `^<wanted>` (in-range) version preserving file formatting, and runs `npm install` per updated project. Includes a bundled Node script (`scripts/npm-update.mjs`) with `--dry-run` and `--root` options.
-- **ai-assist-changelog-bump**: Validates and fixes the `CHANGELOG.md` version number before a PR/commit/push — reads `main` to find the latest version, classifies the branch's changes, computes the correct next semver, and drafts or corrects the entry.
+- **ai-assist-changelog-bump**: Validates and fixes the `CHANGELOG.md` version number before a PR/commit/push — reads `main` to find the latest version, classifies the branch's changes, computes the correct next semver, drafts or corrects the entry, and keeps `package.json`'s `version` aligned with the latest released version.
 
 ## [1.0.0] - 2026-05-23
 

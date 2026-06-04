@@ -1,6 +1,6 @@
 ---
 name: ai-assist-changelog-bump
-description: "Validate and fix the CHANGELOG.md version number before opening a PR, commiting, or pushing changes. Reads main branch to determine the current latest version, classifies changes on the current branch, and proposes the correct next semver. Use this skill when the user mentions changelog, version number, preparing a PR, release version, semver check, or says 'check the changelog', 'what version should this be', 'prepare for PR', or 'fix the version'. Also use proactively when you notice a CHANGELOG entry that may have an incorrect version number."
+description: "Validate and fix the CHANGELOG.md version number before opening a PR, commiting, or pushing changes, and keep package.json's version aligned with it. Reads main branch to determine the current latest version, classifies changes on the current branch, and proposes the correct next semver. Use this skill when the user mentions changelog, version number, preparing a PR, release version, semver check, or says 'check the changelog', 'what version should this be', 'prepare for PR', or 'fix the version'. Also use proactively when you notice a CHANGELOG entry that may have an incorrect version number."
 ---
 
 # Local Changelog Validator
@@ -25,11 +25,16 @@ git log main...HEAD --oneline
 
 # 4. Files changed on this branch
 git diff main...HEAD --name-only
+
+# 5. Current package.json version, if the repo has one (for alignment)
+git show main:package.json | grep '"version"'
 ```
 
 Extract from main's CHANGELOG:
 - The **latest version number** (first `## [x.y.z]` line)
 - The **date** of that version
+
+If a `package.json` exists, also note its `version` field — it should track the CHANGELOG's latest released version, and this skill keeps the two aligned (see Step 6).
 
 Extract from the branch:
 - The **list of changed files** to classify the change type
@@ -110,6 +115,17 @@ Present the draft and ask for approval before writing.
 
 After any changes, show the final CHANGELOG entry for confirmation.
 
+### Step 6 — Align package.json (if it exists)
+
+If the repo has a `package.json` with a `version` field, keep it in sync with the CHANGELOG's latest **released** version (the newest `## [x.y.z]` heading that is a real version, not `[Unreleased]`).
+
+- After settling the CHANGELOG version in Step 5, read `package.json` and compare its `version` to that version.
+- If they differ, update `package.json`'s `version` to match — change **only** the `version` field, preserving all other keys, ordering, and formatting (indentation, trailing newline).
+- If they already match, leave `package.json` untouched and note it's already aligned.
+- If the CHANGELOG's top entry is still `[Unreleased]` (no concrete version yet), do **not** touch `package.json` — there's no released version to align to. Mention that package.json will be bumped once the entry is given a real version.
+
+Show the `version` change (old → new) for confirmation alongside the CHANGELOG entry. If a `package-lock.json` exists, remind the user it should be refreshed (e.g., via `npm install`) so the lockfile's top-level version matches — but don't run it automatically.
+
 ## Rules
 
 - Never create a version entry without checking main first — the whole point is to derive the version from main's current state
@@ -118,3 +134,5 @@ After any changes, show the final CHANGELOG entry for confirmation.
 - If multiple change types exist (Added + Changed), use multiple headings under the same version
 - The date should reflect when the PR is being prepared (today), not when the work started
 - If the branch has no meaningful changes vs main (e.g., only non-skill files changed), say so and ask if a CHANGELOG entry is actually needed
+- Keep `package.json`'s `version` aligned with the CHANGELOG's latest released version — only edit the `version` field, never reformat or reorder the rest of the file
+- Never align `package.json` to an `[Unreleased]` heading — only to a concrete `x.y.z` version
