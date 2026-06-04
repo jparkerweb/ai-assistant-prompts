@@ -1,4 +1,4 @@
-# AI-ASSIST Skills
+# AI-Assist Skills
 
 <img src="https://github.com/jparkerweb/ai-assist-skills/blob/main/ai-assist-skills.jpg?raw=true" alt="banner" style="max-height:300px;">
 
