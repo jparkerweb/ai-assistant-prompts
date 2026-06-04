@@ -1,6 +1,6 @@
 # AI-ASSIST Skills
 
-<img src="https://github.com/jparkerweb/ai-assistant-skills/blob/main/ai-assistant-skills.jpg?raw=true" alt="banner" style="max-height:300px;">
+<img src="https://github.com/jparkerweb/ai-assist-skills/blob/main/ai-assist-skills.jpg?raw=true" alt="banner" style="max-height:300px;">
 
 A collection of AI agent skills that automate recurring engineering workflows that can be installed across multiple AI coding assistants.
 
@@ -11,12 +11,12 @@ A collection of AI agent skills that automate recurring engineering workflows th
 This single command removes any stale or renamed skills, then installs the latest version of every skill from this repo. Run it any time to stay current:
 
 ```bash
-npx github:jparkerweb/ai-assistant-skills
+npx github:jparkerweb/ai-assist-skills
 ```
 
 Skills are installed globally via [skills.sh](https://skills.sh) and auto-detected by 40+ AI agents (Claude Code, Cursor, Windsurf, GitHub Copilot, etc.).
 
-<img src="https://github.com/jparkerweb/ai-assistant-skills/blob/main/ai-assistant-install.jpg?raw=true" style="max-width: 593px;">
+<img src="https://github.com/jparkerweb/ai-assist-skills/blob/main/ai-assist-install.jpg?raw=true" style="max-width: 593px;">
 
 ## Local Development
 
@@ -59,7 +59,7 @@ Once you're done testing locally and your changes are merged, run the full sync 
 ```bash
 npm run sync
 # or
-npx github:jparkerweb/ai-assistant-skills
+npx github:jparkerweb/ai-assist-skills
 ```
 
 > **Note:** `npm run dev:install` installs from your local working tree, which means it picks up uncommitted changes. This is intentional — it's the fastest way to iterate on a skill. Just remember to run `npm run sync` afterward to restore a clean state from the remote repo.
@@ -113,7 +113,7 @@ npx skills remove        # Uninstall skills
 **Install a specific skill only:**
 
 ```bash
-npx skills add jparkerweb/ai-assistant-skills -g --skill ai-assist-discovery -y
+npx skills add jparkerweb/ai-assist-skills -g --skill ai-assist-discovery -y
 ```
 
 ## Skills

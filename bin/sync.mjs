@@ -5,7 +5,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const REPO = "jparkerweb/ai-assistant-skills";
+const REPO = "jparkerweb/ai-assist-skills";
 const PREFIX = "ai-assist-";
 
 // --- Colors ---

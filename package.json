@@ -1,5 +1,5 @@
 {
-  "name": "ai-assistant-skills",
+  "name": "ai-assist-skills",
   "version": "1.1.0",
   "description": "Sync AI-ASSIST AI agent skills — removes stale skills and installs the latest from the repo",
   "scripts": {
@@ -7,7 +7,7 @@
     "dev:install": "npx skills add . -g --skill"
   },
   "bin": {
-    "ai-assistant-skills": "./bin/sync.mjs"
+    "ai-assist-skills": "./bin/sync.mjs"
   },
   "private": true
 }
