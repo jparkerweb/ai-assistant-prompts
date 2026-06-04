@@ -66,6 +66,9 @@ npx github:jparkerweb/ai-assistant-skills
 
 ## Available Skills
 
+### [ai-assist-changelog-bump](skills/ai-assist-changelog-bump/SKILL.md)
+Validates and fixes the `CHANGELOG.md` version number before a PR/commit/push — reads `main` to find the latest version, classifies the branch's changes, computes the correct next semver, and drafts or corrects the entry.
+
 ### [ai-assist-design-creator](skills/ai-assist-design-creator/SKILL.md)
 Reverse-engineers a website's visual design system from a URL and produces a fully spec-compliant `DESIGN.md` file with YAML design tokens (colors, typography, spacing, rounded corners, components) and human-readable rationale sections.
 
@@ -114,6 +117,23 @@ npx skills add jparkerweb/ai-assistant-skills -g --skill ai-assist-discovery -y
 ```
 
 ## Skills
+
+### ai-assist-changelog-bump
+
+Validates and fixes the `CHANGELOG.md` version number before a PR, commit, or push.
+
+**Usage:**
+
+```
+/ai-assist-changelog-bump
+```
+
+The skill will:
+
+1. Read `main`'s CHANGELOG to find the current latest version
+2. Classify the branch's changes (new skill, capability, behavior change, or bug fix)
+3. Compute the correct next semver and compare it against the branch's entry
+4. Draft a new entry or fix the version/date, with approval before writing
 
 ### ai-assist-design-creator
 
