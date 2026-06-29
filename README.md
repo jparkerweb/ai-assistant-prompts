@@ -75,6 +75,9 @@ Reverse-engineers a website's visual design system from a URL and produces a ful
 ### [ai-assist-discovery](skills/ai-assist-discovery/SKILL.md)
 Deep research and analysis for codebases, technologies, domains, and feasibility assessments with analytical frameworks and confidence-graded findings.
 
+### [ai-assist-dockerize-website](skills/ai-assist-dockerize-website/SKILL.md)
+Guides you from a project folder to a working Docker container that serves a static site or documentation folder. Detects whether to serve ready-made HTML, build a site generator's output, or render a raw markdown docs folder; generates a Dockerfile, `.dockerignore`, `docker-compose.yml`, and a README section; then offers to build/smoke-test and publish to Docker Hub or GHCR.
+
 ### [ai-assist-git-commit](skills/ai-assist-git-commit/SKILL.md)
 Stages and commits changes using a standard commit message format with an `AI Assisted` tag.
 
@@ -243,6 +246,29 @@ The skill will:
 4. Run `npm install` in each updated project to refresh the lockfile
 
 Run with `--dry-run` first to preview every change without writing files or installing.
+
+### ai-assist-dockerize-website
+
+Guides you through containerizing and serving a simple website or documentation folder with Docker.
+
+**Prerequisites:**
+
+- Docker installed (Docker Desktop on Windows/Mac) to build and run the container — though the skill can generate the files without it
+
+**Usage:**
+
+```
+/ai-assist-dockerize-website
+/ai-assist-dockerize-website ./docs --port 8080
+```
+
+The skill will:
+
+1. Inspect the project and classify it — ready-to-serve static HTML, a buildable site (Vite/Astro/MkDocs/Hugo/etc.), or a raw markdown docs folder
+2. Confirm what to serve, the host port, and image/container names (pre-filled from the detection)
+3. Generate a `Dockerfile` (single- or multi-stage), `.dockerignore`, `docker-compose.yml`, and a "Running with Docker" README section
+4. Offer to build the image and smoke-test that it serves an HTTP 200
+5. Optionally walk through publishing the image to Docker Hub or GHCR
 
 ### ai-assist-observability-audit
 

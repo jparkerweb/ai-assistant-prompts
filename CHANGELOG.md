@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.2.0] - 2026-06-28
+
+### Added
+
+- **ai-assist-dockerize-website**: Guides the user through containerizing and serving a static website or documentation folder with Docker. Inspects the project to classify it (ready-to-serve static HTML, a buildable site generator, or a raw markdown docs folder), generates a `Dockerfile`, `.dockerignore`, `docker-compose.yml`, and a "Running with Docker" README section, then offers to build and smoke-test the container and publish the image to Docker Hub or GHCR. Uses `nginx:alpine` for static content and a multi-stage build when the site must be generated. Includes `references/recipes.md` (per-generator multi-stage Dockerfiles, SPA fallback, non-root, Caddy) and `references/registry-publish.md`.
+
 ## [1.1.0] - 2026-06-03
 
 ### Added

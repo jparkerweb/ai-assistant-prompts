@@ -1,0 +1,29 @@
+{
+  "skill_name": "ai-assist-dockerize-website",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I've got a little landing page in the public/ folder of this project — plain index.html with some css and a couple images. Can you get it running in a Docker container so I can show a teammate?",
+      "expected_output": "Strategy A (ready static). Single-stage nginx:alpine Dockerfile copying public/ into the web root, plus .dockerignore, docker-compose.yml, and a 'Running with Docker' README section. Should NOT add a build step. Offers to build/smoke-test rather than doing it unprompted.",
+      "files": ["fixtures/static-site/"]
+    },
+    {
+      "id": 2,
+      "prompt": "This repo has a docs/ folder full of markdown — architecture notes, runbooks, that kind of thing. I want to host it as a documentation website in a container. Set that up for me.",
+      "expected_output": "Strategy C (raw docs, no tooling). Recommends rendering rather than serving raw .md, generates a minimal mkdocs.yml, uses the MkDocs multi-stage Dockerfile (python build stage -> nginx), plus .dockerignore, docker-compose.yml, README section. Explains why raw .md serving is a poor experience.",
+      "files": ["fixtures/docs-folder/"]
+    },
+    {
+      "id": 3,
+      "prompt": "Dockerize this so it builds and serves from one container. It's a Vite app — npm run build spits out a dist folder.",
+      "expected_output": "Strategy B (buildable). Multi-stage Dockerfile: node:alpine build stage running npm ci && npm run build, runtime stage copying dist/ into nginx:alpine. .dockerignore excludes node_modules, plus docker-compose.yml and README section. Build tooling not present in the final image.",
+      "files": ["fixtures/vite-app/"]
+    },
+    {
+      "id": 4,
+      "prompt": "Can you dockerize my website? The whole thing runs out of server.js — it's an Express app with a few API routes.",
+      "expected_output": "Strategy D (out of scope). Detects this is a dynamic app, not static content. Stops and explains plainly that the skill serves static sites and this needs the app's own runtime + start command, rather than generating an nginx static image that wouldn't run the app. Does not produce a broken static Dockerfile.",
+      "files": ["fixtures/express-app/"]
+    }
+  ]
+}
