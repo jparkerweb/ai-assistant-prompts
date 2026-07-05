@@ -84,6 +84,9 @@ Stages and commits changes using a standard commit message format with an `AI As
 ### [ai-assist-git-pr](skills/ai-assist-git-pr/SKILL.md)
 Adaptive GitHub PR lifecycle — create PRs, generate descriptions, investigate review comments with deep analysis and batch approval, check merge readiness. All via `gh` CLI.
 
+### [ai-assist-git-pr-review](skills/ai-assist-git-pr-review/SKILL.md)
+Standards-based code review of a GitHub PR — reads the reviewed repo's agents files (AGENTS.md, `.agents-docs/`, CLAUDE.md), checks the diff against them plus general best practices, then (after approval) posts findings as inline comments and submits a REQUEST_CHANGES review. Review-only: never approves, merges, or pushes.
+
 ### [ai-assist-npm-update](skills/ai-assist-npm-update/SKILL.md)
 Finds every `package.json` under the current directory, runs `npm outdated`, bumps each outdated dependency to its `^<wanted>` (in-range) version, and runs `npm install`. Supports `--dry-run`.
 
@@ -226,6 +229,30 @@ The skill will:
 5. **Status:** Report merge readiness — CI checks, review approvals, conflicts, draft status, PR size
 
 All operations use `gh` CLI exclusively. Reads are automatic; writes require preview + explicit approval. Never merges, closes, or force pushes.
+
+### ai-assist-git-pr-review
+
+Standards-based code review of a GitHub Pull Request that posts findings as inline comments and requests changes. The inverse of `ai-assist-git-pr`: that skill manages your own PR, this one authors a review on someone else's.
+
+**Prerequisites:**
+
+- GitHub CLI (`gh`) installed and authenticated
+
+**Usage:**
+
+```
+/ai-assist-git-pr-review https://github.com/org/repo/pull/42
+```
+
+The skill will:
+
+1. Parse the PR URL and load PR metadata (must be open; pins the review to the head SHA)
+2. Gather the reviewed repo's documented standards from its agents files on the base branch and distill a rules checklist
+3. Evaluate the diff — documented standards first, general best practices second — and categorize each finding CRITICAL/WARNING/NIT
+4. Present every inline comment for approval before anything is posted (gated)
+5. Post one REQUEST_CHANGES review with all approved inline comments, then verify it landed
+
+Review-only: it never approves, merges, closes, or pushes code.
 
 ### ai-assist-npm-update
 

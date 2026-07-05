@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.3.0] - 2026-07-05
+
+### Added
+
+- **ai-assist-git-pr-review**: Performs a standards-based code review on a GitHub Pull Request, then (after explicit approval) posts the findings as inline review comments and submits the review as `REQUEST_CHANGES`. Reads the reviewed repo's full documented standards from its agents files (`AGENTS.md`, `.agents-docs/`, `CLAUDE.md`) on the PR's base branch, checks the diff against them plus general best practices, and categorizes each finding CRITICAL/WARNING/NIT. Review-only — never approves, merges, closes, or pushes. The inverse of `ai-assist-git-pr`. Includes `references/posting-review.md` (gathering agents files, anchoring rules, the exact `gh api` review payload, suggestion blocks, verification, and recovery).
+
 ## [1.2.0] - 2026-06-28
 
 ### Added
