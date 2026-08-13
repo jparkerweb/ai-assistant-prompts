@@ -87,6 +87,9 @@ Adaptive GitHub PR lifecycle — create PRs, generate descriptions, investigate 
 ### [ai-assist-git-pr-review](skills/ai-assist-git-pr-review/SKILL.md)
 Standards-based code review of a GitHub PR — reads the reviewed repo's agents files (AGENTS.md, `.agents-docs/`, CLAUDE.md), checks the diff against them plus general best practices, then (after approval) posts findings as inline comments and submits a REQUEST_CHANGES review. Review-only: never approves, merges, or pushes.
 
+### [ai-assist-git-publish](skills/ai-assist-git-publish/SKILL.md)
+Publishes a GitHub Release when `CHANGELOG.md`'s top version is ahead of the latest published release — derives the repo and default branch from `gh`, matches the repo's existing tag style, and creates the release only after explicit approval. Manual invocation only.
+
 ### [ai-assist-npm-update](skills/ai-assist-npm-update/SKILL.md)
 Finds every `package.json` under the current directory, runs `npm outdated`, bumps each outdated dependency to its `^<wanted>` (in-range) version, and runs `npm install`. Supports `--dry-run`.
 
@@ -141,6 +144,8 @@ The skill will:
 3. Compute the correct next semver and compare it against the branch's entry
 4. Draft a new entry or fix the version/date, with approval before writing
 5. Align `package.json`'s `version` (if present) with the latest released version
+
+Once the bump merges, [`ai-assist-git-publish`](#ai-assist-git-publish) turns that CHANGELOG entry into a GitHub Release.
 
 ### ai-assist-design-creator
 
@@ -253,6 +258,31 @@ The skill will:
 5. Post one REQUEST_CHANGES review with all approved inline comments, then verify it landed
 
 Review-only: it never approves, merges, closes, or pushes code.
+
+### ai-assist-git-publish
+
+Publishes a GitHub Release when `CHANGELOG.md`'s top version is ahead of the latest release on GitHub. Closes the loop after [`ai-assist-changelog-bump`](#ai-assist-changelog-bump) lands a version bump on the default branch.
+
+**Prerequisites:**
+
+- GitHub CLI (`gh`) installed and authenticated
+- A GitHub remote and a `CHANGELOG.md` at the repo root
+
+**Usage:**
+
+```
+/ai-assist-git-publish
+```
+
+The skill will:
+
+1. Require a clean working tree, then derive the repo and default branch from `gh repo view` (asking before switching branches)
+2. Parse the top concrete version heading from `CHANGELOG.md` (bracketed, `v`-prefixed, or bare) and capture its section body as release notes
+3. Compare it numerically against the latest published release — if it isn't ahead, no-op and stop
+4. Present the proposed tag, title, target, and notes for approval before anything is written
+5. Create the release via `gh release create --notes-file --target <default branch>`, then verify and report the release URL
+
+Read-only against your files: it never edits `CHANGELOG.md`, runs `git tag`, or pushes.
 
 ### ai-assist-npm-update
 

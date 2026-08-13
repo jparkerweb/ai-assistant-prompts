@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.0] - 2026-08-13
+
+### Added
+
+- **ai-assist-git-publish**: Publishes a GitHub Release when `CHANGELOG.md`'s top version is ahead of the latest release published on GitHub, closing the loop after `ai-assist-changelog-bump` lands a version bump. Derives the repository and default branch from `gh repo view` (never hardcoded), parses bracketed/`v`-prefixed/bare version headings, compares versions numerically, matches the repo's existing tag style, and creates the release via `gh release create --notes-file --target <default branch>` only after explicit approval. Manual invocation only — never auto-triggers.
+
 ## [1.3.1] - 2026-08-13
 
 ### Changed
