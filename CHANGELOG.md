@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.3.1] - 2026-08-13
+
+### Changed
+
+- **ai-assist-changelog-bump**: Now recognizes both `## [x.y.z]` and `## vx.y.z` version headings (plus `## [vx.y.z]`, bare `## x.y.z`, and alternate date separators) instead of assuming the bracketed Keep a Changelog style. Detects the CHANGELOG's existing heading style and writes new entries to match it, never converting or mixing styles, and strips brackets/`v` prefixes before comparing versions or aligning `package.json`.
+
 ## [1.3.0] - 2026-07-05
 
 ### Added

@@ -31,14 +31,39 @@ git show main:package.json | grep '"version"'
 ```
 
 Extract from main's CHANGELOG:
-- The **latest version number** (first `## [x.y.z]` line)
+- The **latest version number** (the first version heading — see "Version heading formats" below)
 - The **date** of that version
+- The **heading format** the file uses, so new entries match it exactly
 
 If a `package.json` exists, also note its `version` field — it should track the CHANGELOG's latest released version, and this skill keeps the two aligned (see Step 6).
 
 Extract from the branch:
 - The **list of changed files** to classify the change type
 - The **commit messages** for changelog entry content
+
+#### Version heading formats
+
+CHANGELOGs use different heading conventions. Both of these are valid and must be handled:
+
+| Style | Example |
+|-------|---------|
+| Bracketed (Keep a Changelog) | `## [1.8.1] - 2026-08-13` |
+| `v`-prefixed | `## v1.8.1 - 2026-08-13` |
+
+Variants of the same two styles also occur and count as matches: `## [v1.8.1]`, `## 1.8.1`, and any of the above with `–`, `—`, `(2026-08-13)`, or no date at all after the version.
+
+Match version headings with a pattern that tolerates all of these, for example:
+
+```bash
+# Latest version heading on main (any supported style)
+git show main:CHANGELOG.md | grep -m1 -E '^##[[:space:]]+\[?v?[0-9]+\.[0-9]+\.[0-9]+\]?'
+```
+
+The captured semver is `[0-9]+\.[0-9]+\.[0-9]+` — strip any surrounding `[`/`]` and any leading `v` before comparing or incrementing. Never compare version strings raw; compare the three numeric components.
+
+**Detect the file's dominant style once and reuse it.** Look at the existing version headings in `CHANGELOG.md` on the branch (falling back to main's if the branch has none) and record which style they use — bracketed vs. `v`-prefixed, whether a `v` appears inside brackets, and the separator before the date. Every heading this skill writes must match that style exactly. Never convert a file from one style to the other, and never mix styles within a file.
+
+Unreleased headings appear as `## [Unreleased]` or `## Unreleased` — treat both as "no concrete version yet".
 
 ### Step 2 — Classify the change
 
@@ -97,7 +122,7 @@ Read the current `CHANGELOG.md` on the branch. Look for:
 
 ### Step 5 — Draft or fix the CHANGELOG entry
 
-**If no entry exists**, draft a new one based on the commits and changed files. Follow Keep a Changelog format:
+**If no entry exists**, draft a new one based on the commits and changed files, using the heading style detected in Step 1:
 
 ```markdown
 ## [{computed-version}] - {YYYY-MM-DD}
@@ -107,9 +132,15 @@ Read the current `CHANGELOG.md` on the branch. Look for:
 - **{skill-or-area}**: {concise description of what changed and why}
 ```
 
+For a `v`-prefixed file, the same entry is written as:
+
+```markdown
+## v{computed-version} - {YYYY-MM-DD}
+```
+
 Present the draft and ask for approval before writing.
 
-**If the version is wrong**, update only the version number and date — preserve the existing content unless the user asks for content changes too.
+**If the version is wrong**, update only the version number and date — preserve the existing content, the heading's style, and its surrounding punctuation unless the user asks for content changes too.
 
 **If the date is stale** (entry exists with correct version but old date), update to today's date since this is when the PR will be opened.
 
@@ -117,12 +148,13 @@ After any changes, show the final CHANGELOG entry for confirmation.
 
 ### Step 6 — Align package.json (if it exists)
 
-If the repo has a `package.json` with a `version` field, keep it in sync with the CHANGELOG's latest **released** version (the newest `## [x.y.z]` heading that is a real version, not `[Unreleased]`).
+If the repo has a `package.json` with a `version` field, keep it in sync with the CHANGELOG's latest **released** version (the newest version heading — in either supported style — that is a real version, not an Unreleased heading).
 
 - After settling the CHANGELOG version in Step 5, read `package.json` and compare its `version` to that version.
 - If they differ, update `package.json`'s `version` to match — change **only** the `version` field, preserving all other keys, ordering, and formatting (indentation, trailing newline).
 - If they already match, leave `package.json` untouched and note it's already aligned.
-- If the CHANGELOG's top entry is still `[Unreleased]` (no concrete version yet), do **not** touch `package.json` — there's no released version to align to. Mention that package.json will be bumped once the entry is given a real version.
+- `package.json`'s `version` is always the bare semver — strip any `v` prefix or brackets from the CHANGELOG heading before writing it.
+- If the CHANGELOG's top entry is still an Unreleased heading (no concrete version yet), do **not** touch `package.json` — there's no released version to align to. Mention that package.json will be bumped once the entry is given a real version.
 
 Show the `version` change (old → new) for confirmation alongside the CHANGELOG entry. If a `package-lock.json` exists, remind the user it should be refreshed (e.g., via `npm install`) so the lockfile's top-level version matches — but don't run it automatically.
 
@@ -134,5 +166,7 @@ Show the `version` change (old → new) for confirmation alongside the CHANGELOG
 - If multiple change types exist (Added + Changed), use multiple headings under the same version
 - The date should reflect when the PR is being prepared (today), not when the work started
 - If the branch has no meaningful changes vs main (e.g., only non-skill files changed), say so and ask if a CHANGELOG entry is actually needed
+- Support both `## [x.y.z]` and `## vx.y.z` heading styles — detect which one the file already uses and write new entries in that same style
+- Never rewrite a CHANGELOG from one heading style to the other, and never mix styles within a single file
 - Keep `package.json`'s `version` aligned with the CHANGELOG's latest released version — only edit the `version` field, never reformat or reorder the rest of the file
-- Never align `package.json` to an `[Unreleased]` heading — only to a concrete `x.y.z` version
+- Never align `package.json` to an Unreleased heading — only to a concrete `x.y.z` version
