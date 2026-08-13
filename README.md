@@ -11,7 +11,7 @@ A collection of AI agent skills that automate recurring engineering workflows th
 This single command removes any stale or renamed skills, then installs the latest version of every skill from this repo. Run it any time to stay current:
 
 ```bash
-npx github:jparkerweb/ai-assist-skills
+npx --allow-git=all github:jparkerweb/ai-assist-skills
 ```
 
 Skills are installed globally via [skills.sh](https://skills.sh) and auto-detected by 40+ AI agents (Claude Code, Cursor, Windsurf, GitHub Copilot, etc.).
@@ -59,7 +59,7 @@ Once you're done testing locally and your changes are merged, run the full sync 
 ```bash
 npm run sync
 # or
-npx github:jparkerweb/ai-assist-skills
+npx --allow-git=all github:jparkerweb/ai-assist-skills
 ```
 
 > **Note:** `npm run dev:install` installs from your local working tree, which means it picks up uncommitted changes. This is intentional — it's the fastest way to iterate on a skill. Just remember to run `npm run sync` afterward to restore a clean state from the remote repo.
