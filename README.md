@@ -175,6 +175,29 @@ The skill will:
 4. Produce structured documentation with executive summary, findings, and framework outputs in chat
 5. Optionally save research to `docs/research/`, only after explicit user confirmation
 
+### ai-assist-dockerize-website
+
+Guides you through containerizing and serving a simple website or documentation folder with Docker.
+
+**Prerequisites:**
+
+- Docker installed (Docker Desktop on Windows/Mac) to build and run the container — though the skill can generate the files without it
+
+**Usage:**
+
+```
+/ai-assist-dockerize-website
+/ai-assist-dockerize-website ./docs --port 8080
+```
+
+The skill will:
+
+1. Inspect the project and classify it — ready-to-serve static HTML, a buildable site (Vite/Astro/MkDocs/Hugo/etc.), or a raw markdown docs folder
+2. Confirm what to serve, the host port, and image/container names (pre-filled from the detection)
+3. Generate a `Dockerfile` (single- or multi-stage), `.dockerignore`, `docker-compose.yml`, and a "Running with Docker" README section
+4. Offer to build the image and smoke-test that it serves an HTTP 200
+5. Optionally walk through publishing the image to Docker Hub or GHCR
+
 ### ai-assist-git-commit
 
 Stages and commits changes using a standard commit message format.
@@ -303,29 +326,6 @@ The skill will:
 4. Run `npm install` in each updated project to refresh the lockfile
 
 Run with `--dry-run` first to preview every change without writing files or installing.
-
-### ai-assist-dockerize-website
-
-Guides you through containerizing and serving a simple website or documentation folder with Docker.
-
-**Prerequisites:**
-
-- Docker installed (Docker Desktop on Windows/Mac) to build and run the container — though the skill can generate the files without it
-
-**Usage:**
-
-```
-/ai-assist-dockerize-website
-/ai-assist-dockerize-website ./docs --port 8080
-```
-
-The skill will:
-
-1. Inspect the project and classify it — ready-to-serve static HTML, a buildable site (Vite/Astro/MkDocs/Hugo/etc.), or a raw markdown docs folder
-2. Confirm what to serve, the host port, and image/container names (pre-filled from the detection)
-3. Generate a `Dockerfile` (single- or multi-stage), `.dockerignore`, `docker-compose.yml`, and a "Running with Docker" README section
-4. Offer to build the image and smoke-test that it serves an HTTP 200
-5. Optionally walk through publishing the image to Docker Hub or GHCR
 
 ### ai-assist-observability-audit
 
