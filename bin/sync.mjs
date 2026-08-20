@@ -90,7 +90,7 @@ function fail(msg) {
 console.log(banner);
 
 // --- Step 1: Discover installed ai-assist-* skills ---
-step(1, "Scanning installed global skills...");
+step(1, "Scanning installed global skills (please wait ⌛)...");
 
 const json = run("npx skills list -g --json", { silent: true });
 if (!json) {
