@@ -23,9 +23,11 @@ const c = {
 
 // --- Version ---
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const repoRoot = join(__dirname, "..");
+const skillsDir = join(repoRoot, "skills");
 let version = "?";
 try {
-  const pkg = JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf-8"));
+  const pkg = JSON.parse(readFileSync(join(repoRoot, "package.json"), "utf-8"));
   version = pkg.version;
 } catch {}
 
@@ -50,11 +52,21 @@ ${c.cyan}${bannerLines.join("\n")}${c.reset}
 function run(cmd, { silent = false } = {}) {
   try {
     return execSync(cmd, {
+      cwd: skillsDir,
       encoding: "utf-8",
       stdio: silent ? ["pipe", "pipe", "pipe"] : ["pipe", "pipe", "inherit"],
     }).trim();
   } catch {
     return "";
+  }
+}
+
+function runInteractive(cmd) {
+  try {
+    execSync(cmd, { cwd: skillsDir, stdio: "inherit" });
+    return true;
+  } catch {
+    return false;
   }
 }
 
@@ -119,7 +131,6 @@ if (installedSkills.length > 0) {
 
 // --- Step 3: Install skills from /skills directory only ---
 console.log();
-const skillsDir = join(__dirname, "..", "skills");
 let skillDirs;
 try {
   skillDirs = readdirSync(skillsDir).filter((entry) =>
@@ -130,14 +141,13 @@ try {
   process.exit(1);
 }
 
-step(3, `Installing ${c.yellow}${skillDirs.length}${c.reset} skills from ${c.white}${REPO}/skills${c.reset}...`);
-for (const skill of skillDirs) {
-  process.stdout.write(`  ${c.gray}Installing ${skill}...${c.reset}`);
-  run(`npx skills add ${REPO} -g --skill ${skill} -y`, { silent: true });
-  console.log(` ${c.green}done${c.reset}`);
+step(3, `Select from ${c.yellow}${skillDirs.length}${c.reset} skills in the local ${c.white}${REPO}/skills${c.reset} clone:`);
+if (!runInteractive(`npx skills add "${skillsDir}" -g`)) {
+  fail("Skills installation canceled or failed.");
+  process.exit(1);
 }
 
 // --- Done ---
 console.log(`
-${c.green}${c.bold}  Sync complete!${c.reset} ${c.dim}All ${PREFIX}* skills are up to date.${c.reset}
+${c.green}${c.bold}  Sync complete!${c.reset} ${c.dim}Selected ${PREFIX}* skills updated.${c.reset}
 `);

@@ -1,0 +1,70 @@
+# =========================================
+# ==      Verify CHANGELOG.md Bumped      ==
+# =========================================
+# Fails the PR check if the top version in
+# CHANGELOG.md on the branch matches the top
+# version on the base branch (i.e., no new
+# entry was added).
+#
+# This is a safety gate — it does not
+# generate the entry. Contributors should
+# run the `pcweb-skills-changelog` skill
+# locally to produce the correct semver and
+# content before opening a PR.
+# =========================================
+
+name: verify-changelog
+
+on:
+  pull_request:
+    branches: [main]
+
+  workflow_dispatch:
+
+jobs:
+  verify-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compare branch vs base CHANGELOG.md top version
+        run: |
+          set -e
+
+          BASE_REF="${{ github.base_ref || github.event.repository.default_branch }}"
+
+          if [ -z "$BASE_REF" ]; then
+            echo "::error::Could not determine a base branch. Expected github.base_ref for pull_request events or github.event.repository.default_branch as a fallback."
+            exit 1
+          fi
+
+          git fetch origin "$BASE_REF" --depth=1
+
+          # Accepts '## [x.y.z]', '## v[x.y.z]', '## x.y.z' and '## vx.y.z'
+          extract_top_version() {
+            grep -m1 -E '^## v?\[?[0-9]+\.[0-9]+\.[0-9]+' "$1" \
+              | sed -E 's/^## v?\[?([0-9]+\.[0-9]+\.[0-9]+[^]]*)\]?.*/\1/'
+          }
+
+          BASE_CHANGELOG=$(mktemp)
+          git show "origin/${BASE_REF}:CHANGELOG.md" > "$BASE_CHANGELOG"
+          BASE_VERSION=$(extract_top_version "$BASE_CHANGELOG")
+          BRANCH_VERSION=$(extract_top_version CHANGELOG.md)
+          rm -f "$BASE_CHANGELOG"
+
+          echo "Base (${BASE_REF}) version: ${BASE_VERSION}"
+          echo "Branch version:           ${BRANCH_VERSION}"
+
+          if [ -z "$BASE_VERSION" ] || [ -z "$BRANCH_VERSION" ]; then
+            echo "::error file=CHANGELOG.md::Could not parse a top-level '## [x.y.z]' or '## v[x.y.z]' version from CHANGELOG.md on the branch or base."
+            exit 1
+          fi
+
+          if [ "$BASE_VERSION" = "$BRANCH_VERSION" ]; then
+            echo "::error file=CHANGELOG.md::CHANGELOG.md top version (${BRANCH_VERSION}) matches ${BASE_REF}. Add a new version entry above it. Run the pcweb-skills-changelog skill locally to generate the correct semver and entry."
+            exit 1
+          fi
+
+          echo "CHANGELOG.md has been bumped. OK."

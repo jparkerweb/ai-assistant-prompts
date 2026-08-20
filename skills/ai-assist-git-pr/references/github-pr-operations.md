@@ -1,8 +1,8 @@
 # PR Operations Reference
 
-> Part of [ai-assist-git-pr](../SKILL.md) — operational details for procedures, verification, and recovery across all modes.
-> See also: SKILL.md (orchestrator with concise rules), github-pr-create.md (Create/Status workflows), github-pr-describe.md (Describe workflow, analysis framework).
-> **Known consumers:** ai-assist-git-pr
+> **Loaded by:** Reference Loading table — Write+Verify rows of Create / Describe / Comments modes. Part of [ai-assist-git-pr SKILL.md](../SKILL.md).
+> **Owns (canonical):** Source-of-Truth Hierarchy, Approval Protocol per-action details, Write Verification table, Recovery table, Important Reminders.
+> **See also:** `github-pr-create.md`, `github-pr-describe.md`, `github-comment-review.md`.
 
 This file contains the detailed operational procedures that SKILL.md references in summary form. Consult this file for full verification tables, per-action approval details, complete recovery procedures, and post-merge assessment message templates.
 
@@ -14,7 +14,7 @@ This file contains the detailed operational procedures that SKILL.md references 
 | **2 — Project context** | AGENTS.md, .agents-docs/, README, project docs | Architecture, conventions, patterns, team norms |
 | **3 — External** | Library docs, security advisories, best practices | Validate approaches, flag risks, confirm patterns |
 
-The code diff and commit history are the only authoritative sources. The branch may contain a different fix than any prior plan described, a partial fix, a follow-up fix, or work that expanded beyond the original scope. Always verify the description against the code.
+Plans and tickets may become stale during development. The branch may contain a different fix than originally described, a partial fix, a follow-up fix, or work that expanded beyond the original scope. Never assume the ticket accurately describes the PR — verify against the code.
 
 ## Post-Merge Branch Assessment
 

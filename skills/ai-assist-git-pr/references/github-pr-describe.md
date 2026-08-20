@@ -10,15 +10,16 @@ This file contains the shared analysis and drafting logic used by both Create an
 
 ## Context Gathering
 
-Build a complete picture before writing anything. Collect from all available sources, weighted by the source-of-truth hierarchy (code is always authoritative).
+Build a complete picture before writing anything. Collect from all available sources, weighted by the source-of-truth hierarchy (code authoritative).
 
 **Diff source:** Create mode uses `git diff origin/$base...HEAD`. Describe mode uses a fresh `gh pr diff` (do NOT reuse cached diff).
 
 1. **Code diff** (authoritative) — read every changed file fully, not just diff hunks. Understand surrounding context, callers, dependencies.
-2. **Commit history** (authoritative) — `git log origin/$base..HEAD --format='%h %s'`. Commit messages reveal intent, sequencing, and scope evolution. Multiple commits may tell a different story than the final diff alone.
+2. **Commit history** (authoritative) — `git log origin/$base..HEAD --format='%h %s'`. Commit messages reveal intent, sequencing, and scope evolution. Multiple commits may tell a different story than the ticket.
 3. **Changed file contents** (authoritative) — for non-trivial changes, read the full file to understand what the change fits into. Trace imports, callers, consumers, side effects.
 4. **Project docs** — AGENTS.md, .agents-docs/, README, architectural docs. Understand conventions, naming, patterns the reviewer expects.
-5. **External research** (as needed) — if the diff touches libraries, security patterns, or unfamiliar APIs, verify approaches against official docs, advisories, or trusted sources. Don't speculate about correctness — confirm it.
+5. **Ticket context** (starting context, best-effort) — if ticket context is available, use it to understand original intent, acceptance criteria, and stakeholder context. Cross-reference against what the code actually does — the PR may implement more, less, or different work than the ticket describes. If unavailable, skip this — it's not a blocker.
+6. **External research** (as needed) — if the diff touches libraries, security patterns, or unfamiliar APIs, verify approaches against official docs, advisories, or trusted sources. Don't speculate about correctness — confirm it.
 
 ---
 
@@ -47,7 +48,7 @@ For each file in the diff:
 
 3. **Why was this change needed?**
    - Look at the surrounding code for context
-   - Check if the diff references error messages or specific conditions
+   - Check if the diff references error messages, ticket IDs, or specific conditions
    - If a bug fix: what was the original bug? How does this fix it?
    - If a feature: what user/system need does this serve?
 
@@ -73,13 +74,20 @@ After analyzing individual files, look at the changes as a whole:
 
 After per-file and cross-file analysis, reconcile all gathered sources before drafting:
 
-1. **Commits vs. diff** — Do commit messages tell a story the final diff obscures? Sequential commits may reveal: failed approaches that were reverted, incremental refactors, scope changes mid-development. Use commit narrative to explain *why* the final state looks the way it does.
+1. **Code vs. ticket** — Does the diff match the ticket's description/AC? Common divergences:
+   - PR implements a *different* fix than the ticket described (developer found a better approach)
+   - PR implements a *subset* (ticket partially addressed, rest is follow-up)
+   - PR includes *extra* work not in the ticket (opportunistic cleanup, related bug found during testing, scope expansion)
+   - PR is a *follow-up* to a previous fix on the same ticket (the branch may have prior merged work)
+   - Describe what the code does, not what the ticket says. Note divergences only if they help the reviewer understand context.
 
-2. **Code vs. project conventions** — Does the change follow patterns from AGENTS.md and existing code? If it introduces a new pattern, call that out as a key decision. If it deviates from conventions, explain why.
+2. **Commits vs. diff** — Do commit messages tell a story the final diff obscures? Sequential commits may reveal: failed approaches that were reverted, incremental refactors, scope changes mid-development. Use commit narrative to explain *why* the final state looks the way it does.
 
-3. **Code vs. external sources** — If the diff touches libraries, security-sensitive code, or unfamiliar APIs, were approaches validated against official docs or trusted sources? Flag unverified patterns honestly rather than assuming correctness.
+3. **Code vs. project conventions** — Does the change follow patterns from AGENTS.md and existing code? If it introduces a new pattern, call that out as a key decision. If it deviates from conventions, explain why.
 
-**Rule: when sources conflict, the code wins.** The description describes the PR, not the plan, not what should have been built. Describe what the code actually does.
+4. **Code vs. external sources** — If the diff touches libraries, security-sensitive code, or unfamiliar APIs, were approaches validated against official docs or trusted sources? Flag unverified patterns honestly rather than assuming correctness.
+
+**Rule: when sources conflict, the code wins.** The description describes the PR, not the ticket, not the plan, not what should have been built. If the code diverges from the ticket, describe the code and note the divergence.
 
 ### Diff Reading Techniques
 
@@ -166,10 +174,29 @@ Fetch existing PR: `gh pr view --json number,url,title,body,state`. Check:
 - **No PR (exit code 1)** → abort: "No PR found for this branch. Create one first?"
 - **MERGED** → abort: "PR #N was already merged. Create a new PR first, then describe it."
 - **CLOSED** → abort: "PR #N is closed. Create a new PR first, then describe it."
-- **OPEN** → proceed. If non-empty body: "This PR already has a description ([N] chars). Replace entirely, or append?" Gate on user's choice.
+- **OPEN** → proceed. If non-empty body, present this 3-way gate:
+
+  > This PR already has a description ([N] chars). How should I update it?
+  >
+  > 1. **Surgical-merge (default)** — Preserve unchanged sections verbatim. Edit only the sections affected by recent changes. Show a section-level diff before writing.
+  > 2. **Append** — Add new content to the end of the existing body. No existing content modified.
+  > 3. **Replace** — Discard the entire existing body and write a fresh one. Destructive — only choose this if the existing body is wrong or stale.
+
+  Default to surgical-merge if the user says "update", "edit", "fix", or anything ambiguous. Only switch to replace on explicit "rewrite" / "replace entirely" / "start over". Always echo the chosen mode back to the user before proceeding to Step 1.
 
 **Step 1 — Find PR:**
 `gh pr view --json number,url,title,body` — capture PR number, current body.
+
+**If mode = surgical-merge** (the default):
+1. Parse the current body into top-level sections by `##` and `###` headings. Each section is an editable unit.
+2. **Unstructured body fallback:** If no `##` headings are found, the body has no section structure. Surface: *"No section structure detected in the existing description — surgical-merge requires `##` headings. Defaulting to append mode instead. Proceed?"* Do NOT attempt surgical-merge on unstructured prose; default to append and wait for explicit confirmation before continuing.
+3. Identify which sections are affected by the recent changes (look at the diff from Step 2). Common affected sections: `## Summary`, `## Changes`, `## Test Plan`, `## Screenshots`. Common preserved-verbatim sections: `## Linked Issues`, `## References`, `## Migration Notes`, custom sections the team added.
+4. Plan section-level edits: for each affected section, determine whether to (a) update in place, (b) add new bullets to an existing list, (c) replace the section's content. For preserved sections, the content stays **byte-identical**.
+5. Continue to Step 2 (fresh `gh pr diff`) — the diff informs which sections need changes.
+
+**If mode = append:** Skip section parsing. Continue to Step 2 to determine what to add.
+
+**If mode = replace:** Skip section parsing. Continue to Step 2 to draft a fresh body from scratch.
 
 **Step 2 — Fetch fresh diff:**
 `gh pr diff` — stale data guard: do NOT reuse cached diff from a previous mode.
@@ -178,15 +205,26 @@ Fetch existing PR: `gh pr view --json number,url,title,body,state`. Check:
 Follow the Context Gathering procedure above. Use the fresh diff from Step 2 as the code diff source.
 
 **Step 4 — Analyze and synthesize:**
-Apply the Change Analysis Framework above. Reconcile all gathered sources against the actual code following the Context Reconciliation rules above. Read `references/github-pr-templates.md` — select the template matching this PR's size (small: 1-5 files, medium: 5-15, large: 15+).
+Apply the Change Analysis Framework above. Reconcile ticket intent vs actual code following the Context Reconciliation rules above. Read `references/github-pr-templates.md` — select the template matching this PR's size (small: 1-5 files, medium: 5-15, large: 15+).
 
 **Step 5 — Draft description:**
-Draft following the selected template structure exactly — use the `| Area | Change | Why |` table for medium+ PRs, include Key Decisions when non-obvious choices were made, and end with Test Plan. Ground content in what the code shows, enriched by project context where it aligns. Evidence-based (cite specific files/lines), concise (no filler, no restating the diff). End with `AI Assisted`.
+Draft following the selected template structure exactly — use the `| Area | Change | Why |` table for medium+ PRs, include Key Decisions when non-obvious choices were made, and end with Test Plan. Ground content in what the code shows, enriched by project context where it aligns. Evidence-based (cite specific files/lines), concise (no filler, no restating the diff). End with ticket ID and `AI Assisted` only — never append `🤖 Generated with Claude Code` or any agent branding (strip it if your runtime adds it; see `github-pr-templates.md` §Attribution).
 
 **Step 6 — Preview (gated):**
 Present proposed description alongside note of what's being replaced (old body length). This is a gated action.
 
 **Step 7 — Update PR:**
+
+> **Preconditions** (do NOT proceed until ALL true):
+> - ✅ Current PR body has been fetched via `gh pr view --json body` in this session (Step 0 / Step 1 of this file)
+> - ✅ Mode of update is determined: surgical-merge (default), append, or replace
+> - ✅ If surgical-merge: `github-pr-templates.md` §Surgical Edit Patterns has been read
+> - ✅ Fresh `gh pr diff` has been read (Step 2 of this file)
+> - ✅ `github-pr-operations.md` §Write Verification has been read
+> - ✅ User has approved the proposed body preview (Gated)
+>
+> If any precondition is unmet, STOP and report which one. Do not run `gh pr edit --body` (with or without `--body-file`).
+
 On approval: write body to temp file, re-read to verify, run `gh pr edit <number> --body-file <path>`.
 
 **Step 8 — Verify:**

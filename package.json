@@ -1,10 +1,10 @@
 {
   "name": "ai-assist-skills",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Sync AI-ASSIST AI agent skills — removes stale skills and installs the latest from the repo",
   "scripts": {
     "sync": "node ./bin/sync.mjs",
-    "dev:install": "npx skills add . -g --skill"
+    "dev:install": "npx skills add . -g -y --skill"
   },
   "bin": {
     "ai-assist-skills": "./bin/sync.mjs"

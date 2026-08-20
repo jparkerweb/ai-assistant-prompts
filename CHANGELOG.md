@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.0] - 2026-08-20
+
+### Added
+
+- **ai-assist-git-pr**: Adds cross-platform Node helpers for deterministic PR context, comment retrieval, thread listing, and gated reply-and-resolve operations.
+- **CI**: Adds a pull-request check that requires `CHANGELOG.md` to advance beyond the base branch version.
+
+### Changed
+
+- **ai-assist-git-pr**: Strengthens portable command execution, surgical PR-description updates, post-create checks, comment handling, and write verification.
+- **ai-assist-git-pr-review**: De-duplicates findings against existing review threads before requesting changes.
+- **sync**: Installs selected skills interactively from the local clone instead of reinstalling every skill from GitHub.
+
 ## [1.4.0] - 2026-08-13
 
 ### Added

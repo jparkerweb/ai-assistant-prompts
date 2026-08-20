@@ -4,9 +4,9 @@ description: "Perform a standards-based code review on a GitHub Pull Request, th
 argument-hint: "[PR URL] — e.g. 'https://github.com/org/repo/pull/42' or 'review https://github.com/org/repo/pull/42'"
 ---
 
-# AI-ASSIST PR REVIEW
+# PR REVIEW
 
-**Objective:** Review a GitHub PR against the team's documented standards (its agents files) plus general engineering best practices, then — after your explicit approval — post the findings as inline review comments and submit the review as **REQUEST_CHANGES**.
+**Objective:** Review a GitHub PR against documented standards (its agents files) plus general engineering best practices, then — after your explicit approval — post the findings as inline review comments and submit the review as **REQUEST_CHANGES**.
 
 **Role:** Senior reviewer writing for senior engineers. Read the diff deeply, ground every finding in evidence (a cited standard or a concrete code risk), and keep comments short and actionable. A good review reads like it came from a careful teammate, not a linter.
 
@@ -16,7 +16,7 @@ Start each response with `🔍 [PR Review — Step X: Name]` so the user can fol
 
 | Level | Actions | Behavior |
 |-------|---------|----------|
-| **Auto** | Read PR metadata, diff, changed files, agents files; analyze | Execute immediately |
+| **Auto** | Read PR metadata, diff, changed files, agents files, existing review threads; analyze and de-duplicate | Execute immediately |
 | **Gated** | Post the review (inline comments + REQUEST_CHANGES) | Preview every comment → explicit approval → post → verify |
 | **Blocked** | Approve, merge, close, push, edit code, dismiss reviews | Never. This skill only *requests changes*. |
 
@@ -90,7 +90,20 @@ Anchor each finding to a specific `path` + `line` **that appears in the diff** (
 
 Be disciplined about noise: don't invent findings to look thorough. If the PR is genuinely clean, it's fine to end up with only one or two comments — quality over volume.
 
-### Step 5: Present findings for approval (GATED)
+### Step 5: De-duplicate against existing review threads
+
+Before presenting anything, read the review activity that is **already on the PR** and classify each of your candidate findings as either **new** or **already-raised**. Other reviewers — human teammates and bots like GitHub Copilot and Devin Review — have often already raised the same points, and the author may have fixed them, replied with a rationale, or consciously declined. You must **not silently repost** an already-raised point (that relitigates a settled thread and signals you didn't read it) — but you must **not silently drop it either**. Instead, set already-raised findings aside and surface them to the user in Step 6 as items to review, so *they* decide whether the prior dismissal/resolution was actually correct. This step is mandatory, not optional. See `references/posting-review.md` §Gathering Existing Review Threads for the exact `gh api`/GraphQL calls. In short:
+
+1. Fetch **all** prior review activity: inline review comments (`/pulls/$number/comments`), review summaries (`/pulls/$number/reviews`), and issue-level comments (`/issues/$number/comments`) — from every author, including bots (`Copilot`, `devin-ai-integration[bot]`, etc.) and the PR author's own replies. Also pull each thread's **resolved/outdated** status via GraphQL, which is a strong "already handled" signal.
+2. For every candidate finding from Step 4, check whether an existing thread already covers the same issue on the same file/area. Classify it as **already-raised** if any of these hold (record *which* signal, *who* raised it, and *how* it was handled — replied/declined/resolved/outdated/fixed — you'll show this in Step 6):
+   - A prior comment makes substantially the same point (even if worded differently or at a slightly different line).
+   - The author (or anyone) **replied** to that thread dismissing it with a rationale or explaining it's intentional.
+   - The thread is marked **resolved** or **outdated**, or the code it pointed at has since changed (a fix likely landed).
+3. Everything else is a **new** finding. For each already-raised finding, also form a quick judgment: does the prior resolution look sound, or does it seem prematurely dismissed / not actually addressed? You'll present that assessment alongside the item so the user can decide whether to re-raise it.
+
+Both buckets go to the user in Step 6 — **new** findings as proposed comments, **already-raised** findings as review items. Never auto-post an already-raised finding; only include it in the posted review if the user explicitly tells you to re-raise it.
+
+### Step 6: Present findings for approval (GATED)
 
 Show the user the complete set of inline comments before anything is posted. Use this structure:
 
@@ -98,35 +111,62 @@ Show the user the complete set of inline comments before anything is posted. Use
 🔍 Review of PR #<n> — <title>
 Standards source: <which agents files informed this>
 
-Inline comments (<count>):
-[CRITICAL] <path>:<line> — <one-line finding> (cites: <standard or "best practice">)
+New findings — will be posted if approved (<count>):
+1. [CRITICAL] <path>:<line> — <one-line finding> (cites: <standard or "best practice">)
    > <the exact comment body that will be posted>
-[WARNING]  <path>:<line> — ...
-[NIT]      <path>:<line> — ...
+2. [WARNING]  <path>:<line> — ...
+3. [NIT]      <path>:<line> — ...
+
+Already raised by others — NOT posted, for your review (<count>):
+A1. [was WARNING] <path>:<line> — <finding>
+    raised by: <Copilot/Devin Review/reviewer>  |  status: <replied/declined/resolved/outdated/fixed>
+    their resolution: <one-line summary of the existing thread's outcome>
+    my read: <"resolution looks sound" | "may be prematurely dismissed because ...">
+A2. ...
 ```
+
+**Number every item** so the user can refer to it precisely: new findings are `1, 2, 3, ...`; already-raised items use an `A` prefix (`A1, A2, ...`) so the two lists never collide. Present **both** buckets every time:
+- **New findings** are the proposed comments, subject to the usual approval below.
+- **Already raised** findings are shown so the user can judge whether each was correctly handled — this is the point of Step 5, not just a courtesy list. For each, include who raised it, how it was resolved, and your read on whether that resolution holds up. Do **not** pre-select these for posting.
+
+If Step 5 produced **no new findings**, still present the "Already raised" list (it may be the whole review) and recommend **posting nothing** unless the user wants to re-raise one — do not fabricate new findings to fill the review. An already-raised item is added to the posted review **only** when the user explicitly asks to re-raise it; when they do, post it as a normal new inline comment using the combined footer described below and briefly acknowledge the prior thread in the body so it doesn't read as a blind duplicate.
 
 Each comment body should be short, specific, and get straight to the point. Open with the substance — the finding itself — not the severity; leading with `**[WARNING]**`/`**[CRITICAL]**` reads as aggressive. For a documented-standard violation, name the doc/rule; for a best-practice finding, state the risk in one line. Where a fix is obvious and small, include a GitHub suggestion block (see `references/posting-review.md` §Suggestion Blocks).
 
-**Every inline comment ends with a footer** carrying the severity and attribution together, on its own line after a blank line: `_[SEVERITY] - AI Assisted_` (e.g. `...undercut the performance goal of this PR.\n\n_[WARNING] - AI Assisted_`). This keeps priority discoverable without shouting at the top, mirrors the team's `AI Assisted` commit convention, and stays visible even when a comment is read alone in the Files tab. (In the Step 5 preview you still lead each line with the severity — that's for the user's triage; only the *posted body* moves it to the footer.)
+**Every inline comment ends with the combined footer `_[SEVERITY] - AI Assisted_` on its own line after a blank line.** The severity is absent from the finding text and appears only in this footer, so the posted body looks like `...undercut the performance goal of this PR.\n\n_[WARNING] - AI Assisted_`. This keeps priority discoverable without leading aggressively and preserves the team's attribution convention. (In the Step 6 preview you still lead each line with the severity — that's for the user's triage; only the *posted body* moves it to the combined footer.)
 
 **Tone:** write like a direct, respectful teammate. No congratulatory or filler language ("Great job!", "Nice work!", "Solid PR overall") — it adds noise and reads as padding. State the issue and what to do about it, nothing more.
 
-Then ask: *"Post this as a REQUEST_CHANGES review? You can approve all, drop specific items (e.g. 'skip the 2 NITs' or 'skip comment 3'), or edit any wording first."*
+Then ask: *"Post this as a REQUEST_CHANGES review? Refer to items by number — you can approve all the new findings, drop specific ones (e.g. 'drop 3' or 'keep only 1 and 2'), edit any wording, or re-raise an already-raised item if you think it was wrongly dismissed (e.g. 're-raise A2')."*
 
 Wait for explicit approval. Apply any edits/removals and re-show only if the user changed something substantive.
 
-### Step 6: Post the review (GATED write)
+### Step 7: Post the review (GATED write)
+
+**Post-nothing terminal state (check first):** if no new findings remain and the user did not re-raise any already-raised item, there is nothing to submit. Do **not** POST a review — a REQUEST_CHANGES with no inline comments (just the placeholder body) is rejected by the API and would be noise anyway. Skip straight to Step 8 and use the "no review posted" report variant. Only proceed with the POST below when there is at least one approved comment to include.
 
 On approval, build the JSON payload and submit **one** review containing all approved inline comments, with `event: "REQUEST_CHANGES"` and `commit_id` pinned to `headSha`. The GitHub API requires a non-empty `body` for REQUEST_CHANGES, but this is **not** a place for a findings summary — use a single neutral navigational line (e.g. `"Requested changes - details in the inline comments."`) and put all substance in the inline comments. Keep every comment body **ASCII-only** — em-dashes, curly quotes, and other non-ASCII characters get mangled into `?` by shells (notably Windows PowerShell). Exact payload shape, per-shell commands, and encoding guidance: `references/posting-review.md` §Posting the Review.
 
 **Verify after posting:** re-read the PR's reviews and confirm a REQUEST_CHANGES review from your account exists with the expected comment count. If the count mismatches or a comment was rejected (usually a `line` not in the diff → 422), report exactly what failed and don't silently retry — see §Recovery in the reference.
 
-### Step 7: Report
+### Step 8: Report
+
+When a review was posted:
 
 ```
 🔍 [PR Review — Complete]
 PR: #<n> — <title> (<url>)
 Result: REQUEST_CHANGES posted — <X> inline comments (<c> CRITICAL, <w> WARNING, <n> NIT)
+Standards: <agents files used>
+```
+
+When nothing was posted (all candidates were already-raised and none re-raised, or the PR was clean):
+
+```
+🔍 [PR Review — Complete]
+PR: #<n> — <title> (<url>)
+Result: No review posted — <reason: all N candidate findings already covered by existing threads / PR clean>
+Already-raised (not reposted): <count>   New findings: 0
 Standards: <agents files used>
 ```
 
@@ -138,7 +178,7 @@ Standards: <agents files used>
 
 ## Reference Loading
 
-Load `references/posting-review.md` before Step 3 (it covers gathering agents files, reading files at the PR head, anchoring rules, the exact review payload, suggestion blocks, and recovery). Everything else lives in this file.
+Load `references/posting-review.md` before Step 3 (it covers gathering agents files, reading files at the PR head, gathering existing review threads for Step 5 de-duplication, anchoring rules, the exact review payload, suggestion blocks, and recovery). Everything else lives in this file.
 
 ## Related
 

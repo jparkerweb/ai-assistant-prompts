@@ -12,7 +12,7 @@ It is the inverse of `ai-assist-git-pr`: that skill manages *your own* PR and ad
 
 | File | Purpose | Loaded When |
 |------|---------|-------------|
-| `posting-review.md` | Gathering agents files from the PR repo, reading files at the PR head, inline-comment anchoring rules, the exact `gh api .../reviews` JSON payload, suggestion blocks, verification, and recovery | Before Step 3 (standards gathering onward) |
+| `posting-review.md` | Gathering agents files from the PR repo, reading files at the PR head, gathering existing review threads (for de-duplication), inline-comment anchoring rules, the exact `gh api .../reviews` JSON payload, suggestion blocks, verification, and recovery | Before Step 3 (standards gathering onward) |
 
 ## Workflow
 
@@ -23,7 +23,8 @@ PR URL -> gh CLI check
   |-- gather agents files from base branch  -> distill a rules checklist
   |-- fetch diff (+ read files at head for context)
   |-- evaluate: standards first, best practices second -> severity per finding
-  |-- present ALL findings for approval        [GATED]
+  |-- check existing review threads -> split into NEW vs ALREADY-RAISED (human + bot + author replies + resolved/outdated)
+  |-- present NEW findings for approval + ALREADY-RAISED as review items  [GATED]  (or recommend posting nothing)
   +-- post one REQUEST_CHANGES review (inline comments + summary) [GATED write] -> verify -> report
 ```
 
@@ -31,7 +32,7 @@ PR URL -> gh CLI check
 
 | Level | Actions | Behavior |
 |-------|---------|----------|
-| Auto | Read PR metadata, diff, files, agents files; analyze | Execute immediately |
+| Auto | Read PR metadata, diff, files, agents files, existing review threads; analyze and de-duplicate | Execute immediately |
 | Gated | Post the review (inline comments + REQUEST_CHANGES) | Preview every comment + approval + verify |
 | Blocked | Approve, merge, close, push, edit code, dismiss reviews | Never — review-only |
 
@@ -49,3 +50,4 @@ PR URL -> gh CLI check
 - **Inline comments only — no summary write-up.** The review posts findings as inline comments; the required `body` field is just a one-line navigational placeholder (the API rejects an empty body for REQUEST_CHANGES), never a summary or congratulatory note.
 - **Anchoring discipline.** Inline comments only attach to lines in the diff; a finding that can't map to a changed line is anchored to the nearest relevant one or dropped, to avoid 422 errors.
 - **Low-noise reviews.** The skill flags documented-rule violations and genuine best-practice risks only — not style merely illustrated in doc examples, and not personal-preference refactors.
+- **Never relitigate settled threads — but never silently bury them either.** Before presenting findings, the skill reads all prior review activity (human and bot — Copilot, Devin Review — plus author replies and resolved/outdated status) and splits its candidates into *new* findings and *already-raised* findings. New findings are proposed as comments; already-raised findings are **not** auto-posted but are surfaced to the user as review items (with who raised them, how they were resolved, and the skill's read on whether that resolution holds) so the user can decide whether any were wrongly dismissed and should be re-raised. If nothing new remains, it recommends posting nothing unless the user chooses to re-raise an item.
