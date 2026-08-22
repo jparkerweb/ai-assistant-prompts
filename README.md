@@ -99,6 +99,9 @@ Finds every `package.json` under the current directory, runs `npm outdated`, bum
 ### [ai-assist-project-summary](skills/ai-assist-project-summary/SKILL.md)
 Generate project overviews with engineer status updates (recent work, in-progress, issues, roadmap) and offer to surgically enhance existing documentation.
 
+### [ai-assist-prototype](skills/ai-assist-prototype/SKILL.md)
+Builds self-contained, double-click-to-open HTML prototypes so you can vet an interface before it gets built. One file holds several structurally different variants of a page, app screen, component, or terminal/TUI layout, plus a draggable Design Deck: flip variants, tune fonts, colors, spacing, shape, motion and "feel" with live dials and vibe presets, preview at phone/tablet/desktop widths in light or dark, pin comments on elements, then press **Export to LLM** to copy a handoff block you paste back to the agent so it knows exactly which variant and settings you chose.
+
 ### [ai-assist-security-audit](skills/ai-assist-security-audit/SKILL.md)
 16-dimension security posture assessment with CWE references, health scoring, and remediation plans.
 
@@ -360,6 +363,38 @@ The skill will:
 2. Detect project type and generate a plain-language project overview
 3. Produce an engineer status update: recently completed, in-progress, issues/gaps, roadmap, suggested improvements
 4. Offer to surgically enhance existing documentation (README, AGENTS.md) based on findings
+
+### ai-assist-prototype
+
+Builds a self-contained HTML prototype with several structurally different variants and a draggable Design Deck, so you can vet an interface (web page, app screen, component, flow, or terminal/TUI layout) before building it, then hand your decision back to the agent.
+
+**Prerequisites:**
+
+- Node.js 18+ (the bundled build/validate scripts have no dependencies)
+- Any modern browser to open the generated file (no server needed)
+
+**Usage:**
+
+```
+/ai-assist-prototype settings page for our SaaS app, 3 variants
+/ai-assist-prototype TUI for a CI triage tool, split panes vs tabs
+```
+
+Or paste an export back to continue the loop:
+
+```
+/ai-assist-prototype AI-ASSIST PROTOTYPE HANDOFF v1 ...
+```
+
+The skill will:
+
+1. Pin down the brief (subject, audience, the design question, web or TUI, how many variants) and reuse what the repo already has (`DESIGN.md`, Tailwind/CSS tokens, real content)
+2. Plan 3 (max 5) structurally different variants, each with a name and a one-line thesis
+3. Author `prototypes/<slug>.parts.html` (manifest + variant templates that consume the harness tokens) and assemble `prototypes/<slug>.html` with `scripts/build-prototype.mjs`, which also validates it
+4. Verify it renders (optionally driving the page through `window.__PT__` with browser tools) and hand it over with a short guide to the Deck
+5. When you paste the **Export to LLM** block back, restate your decision (variant, preset, changed dials, notes, pins) and either iterate the prototype, turn the tokens into a design spec, or implement the winner for real
+
+Variants explore structure; dials explore feel; the export closes the loop. Works from `file://`, no dependencies, safe to email to a PM or designer.
 
 ### ai-assist-security-audit
 

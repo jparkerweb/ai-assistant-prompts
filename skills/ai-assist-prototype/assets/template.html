@@ -1,0 +1,1052 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>PROTOTYPE_NAME · prototype</title>
+<!--
+  ai-assist-prototype · self-contained prototype
+  ----------------------------------------------------------------------------
+  Open this file directly in a browser (double-click it). No server, no build,
+  no dependencies. Use the floating Design Deck to flip between variants, tune
+  the look with the dials, leave notes and pins, then click "Export to LLM"
+  and paste the copied block back into your AI agent.
+
+  Layout of this file:
+    1. MANIFEST  - JSON describing the prototype, its variants, presets and
+                   controls. Edit this.
+    2. VARIANTS  - one template block (data-variant="...") per design. Edit these.
+    3. HARNESS   - the Design Deck and token engine. Do not hand-edit; if it
+                   breaks, regenerate the file from the skill's
+                   assets/template.html and paste sections 1 and 2 back in.
+  ----------------------------------------------------------------------------
+-->
+</head>
+<body>
+
+<!-- ======================= 1. MANIFEST (edit) ======================= -->
+<script type="application/json" id="pt-manifest">
+{
+  "schema": "ai-assist-prototype/manifest@1",
+  "id": "example-prototype",
+  "name": "Example prototype",
+  "kind": "web",
+  "brief": "Replace this with the design question this prototype answers, who it is for, and what 'good' looks like.",
+  "controls": "web",
+  "defaults": {},
+  "extraControls": [],
+  "hideControls": [],
+  "presets": {},
+  "variants": [
+    {
+      "id": "a",
+      "name": "Starter",
+      "thesis": "A tiny example variant that shows every token in use. Replace it.",
+      "tokens": {}
+    }
+  ]
+}
+</script>
+
+<!-- ======================= 2. VARIANTS (edit) =======================
+  One template block per variant (data-variant="ID"). Inside: a <style>, markup, and
+  an optional <script>. Each variant renders in its own isolated document, so
+  plain selectors (h1, .hero) never leak between variants. Consume the harness
+  tokens (var(--pt-...)) instead of hardcoding colors, fonts, radii and spacing,
+  otherwise the Deck's dials will not move your design.
+-->
+<template data-variant="a">
+<style>
+  .hero { max-width: var(--pt-container); margin: 0 auto; padding: var(--pt-s-8) var(--pt-s-5) var(--pt-s-6); }
+  .eyebrow { color: var(--pt-accent); font-weight: var(--pt-weight-display); letter-spacing: .08em; text-transform: uppercase; font-size: var(--pt-t-xs); }
+  .hero h1 { font-size: var(--pt-t-4xl); margin: var(--pt-s-2) 0 var(--pt-s-3); max-width: 18ch; }
+  .hero p  { color: var(--pt-text-muted); font-size: var(--pt-t-lg); max-width: 52ch; }
+  .actions { display: flex; gap: var(--pt-s-3); margin-top: var(--pt-s-5); flex-wrap: wrap; }
+  .grid { max-width: var(--pt-container); margin: 0 auto; padding: 0 var(--pt-s-5) var(--pt-s-8); display: grid; gap: var(--pt-s-4); grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .card h3 { margin: 0 0 var(--pt-s-2); font-size: var(--pt-t-lg); }
+  .card p  { margin: 0; color: var(--pt-text-muted); }
+  .card .kpi { font-family: var(--pt-font-display); font-size: var(--pt-t-3xl); font-weight: var(--pt-weight-display); color: var(--pt-accent); line-height: 1; margin: var(--pt-s-3) 0 var(--pt-s-2); }
+  /* Real media queries work: each variant renders in its own document sized by the Deck's viewport buttons. */
+  @media (max-width: 640px) { .hero h1 { font-size: var(--pt-t-2xl); } .hero { padding-top: var(--pt-s-6); } }
+</style>
+
+<section class="hero">
+  <div class="eyebrow">Starter variant</div>
+  <h1>Every dial in the Deck moves something on this page.</h1>
+  <p>This placeholder exists so the template opens and works before you replace it. Drag the Deck, try a preset, switch the mode, change the fonts, then press Export to LLM.</p>
+  <div class="actions">
+    <button class="pt-btn pt-btn-primary">Primary action</button>
+    <button class="pt-btn">Secondary</button>
+    <button class="pt-btn pt-btn-ghost">Ghost</button>
+  </div>
+</section>
+
+<section class="grid">
+  <article class="pt-card card"><h3>Surface</h3><div class="kpi">24</div><p>Cards use <code>--pt-surface</code>, <code>--pt-border-color</code>, <code>--pt-radius</code> and <code>--pt-shadow-sm</code>.</p></article>
+  <article class="pt-card card"><h3>Type</h3><div class="kpi">Aa</div><p>Headings use the display font and weight; body text uses the body font, size, line height and tracking.</p></article>
+  <article class="pt-card card"><h3>Space</h3><div class="kpi">4·8</div><p>The spacing steps <code>--pt-s-1</code> … <code>--pt-s-9</code> scale with the Density dial.</p></article>
+  <article class="pt-card card"><h3>Accent</h3><div class="kpi"><span class="pt-badge">badge</span></div><p>Accent, hover, soft and secondary colors derive from one hue, saturation and lightness.</p></article>
+</section>
+
+<script>
+  // Optional per-variant behavior. `PT` is provided by the harness inside this variant's document.
+  // PT.go('screenId')  PT.tokens()  PT.vars()  PT.on('tokens'|'screen'|'ready', fn)  PT.root (this variant's document)
+  PT.on('tokens', function (t) { /* react to dial changes if you need to */ });
+</script>
+</template>
+
+
+<!-- ======================= 3. HARNESS (do not edit) ======================= -->
+<!-- pt-harness v1.0.0 -->
+<style id="pt-deck-css">
+  html, body { margin: 0; height: 100%; }
+  body { background: #e9ebef; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  #pt-stage { position: fixed; inset: 0; overflow: auto; z-index: 0; }
+  #pt-stage[data-viewport="fit"] { overflow: hidden; }
+  #pt-stage iframe { border: 0; display: block; background: #fff; }
+  #pt-stage[data-viewport="fit"] iframe { width: 100%; height: 100%; }
+  .pt-device-wrap { width: max-content; margin: 0 auto; padding: 28px 28px 40px; }
+  .pt-device-label { font: 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: #5b6472; margin: 0 0 8px 2px; }
+  .pt-device { background: #fff; border: 1px solid rgba(0,0,0,.18); border-radius: 14px; overflow: hidden; box-shadow: 0 18px 48px rgba(0,0,0,.22); }
+  body.pt-dragging #pt-stage iframe, body.pt-annotating #pt-deck.pt-composing ~ #pt-stage iframe { pointer-events: none; }
+  body.pt-dragging { cursor: grabbing; }
+
+  #pt-pins { position: fixed; inset: 0; pointer-events: none; z-index: 9000; }
+  .pt-pin { position: absolute; pointer-events: auto; width: 22px; height: 22px; border-radius: 50%; background: #ff4d6d; color: #fff; font: 700 11px/18px ui-sans-serif, system-ui, sans-serif; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,.35); transform: translate(-50%, -50%); cursor: pointer; border: 2px solid #fff; }
+  .pt-pin:hover { background: #ff2e55; }
+
+  #pt-deck { position: fixed; z-index: 9500; width: 324px; max-height: calc(100vh - 24px); display: flex; flex-direction: column; background: #15181e; color: #e6e9ef; border: 1px solid #2b313c; border-radius: 12px; box-shadow: 0 18px 50px rgba(0,0,0,.45); font: 12px/1.4 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; color-scheme: dark; user-select: none; overflow: hidden; }
+  #pt-deck * { box-sizing: border-box; }
+  #pt-deck button, #pt-deck select, #pt-deck input, #pt-deck textarea { font: inherit; color: inherit; }
+  #pt-deck[data-collapsed="true"] { width: auto; }
+  #pt-deck[data-collapsed="true"] .pt-deck-body, #pt-deck[data-collapsed="true"] .pt-deck-foot, #pt-deck[data-collapsed="true"] .pt-deck-title-sub { display: none; }
+  .pt-deck-head { display: flex; align-items: center; gap: 6px; padding: 8px 8px 8px 10px; cursor: grab; background: #1b1f27; border-bottom: 1px solid #2b313c; touch-action: none; }
+  #pt-deck[data-collapsed="true"] .pt-deck-head { border-bottom: 0; }
+  .pt-deck-head:active { cursor: grabbing; }
+  .pt-grip { color: #6b7485; font-size: 14px; letter-spacing: -2px; }
+  .pt-deck-title { flex: 1; min-width: 0; font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pt-deck-title small { display: block; color: #8d96a5; font-weight: 400; font-size: 10.5px; }
+  .pt-icon-btn { width: 24px; height: 24px; border-radius: 6px; border: 1px solid transparent; background: transparent; color: #b7bfcc; cursor: pointer; display: inline-grid; place-items: center; padding: 0; }
+  .pt-icon-btn:hover { background: #262c37; color: #fff; }
+  .pt-icon-btn[aria-pressed="true"] { background: #2a3a55; border-color: #3d5a8a; color: #cfe0ff; }
+  .pt-deck-body { overflow: auto; padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 8px; scrollbar-width: thin; }
+  .pt-deck-foot { border-top: 1px solid #2b313c; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; background: #12151b; }
+  .pt-status { color: #8d96a5; font-size: 10.5px; display: flex; justify-content: space-between; gap: 8px; min-height: 14px; }
+  .pt-status .ok { color: #7ee2a8; } .pt-status .err { color: #ff8da1; }
+
+  .pt-nav { display: grid; grid-template-columns: 26px 1fr 26px; align-items: center; gap: 6px; }
+  .pt-nav-name { text-align: center; font-weight: 650; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pt-nav-name small { color: #8d96a5; font-weight: 400; }
+  .pt-thesis { color: #9aa3b2; font-size: 11px; text-align: center; margin-top: 2px; }
+  .pt-seg { display: flex; gap: 2px; background: #0f1217; border: 1px solid #2b313c; border-radius: 8px; padding: 2px; }
+  .pt-seg button { flex: 1; border: 0; background: transparent; color: #aab3c2; border-radius: 6px; padding: 4px 6px; cursor: pointer; font-size: 11px; white-space: nowrap; }
+  .pt-seg button:hover { color: #fff; }
+  .pt-seg button[aria-pressed="true"] { background: #2c3442; color: #fff; }
+  .pt-toolbar { display: flex; gap: 4px; align-items: center; }
+  .pt-toolbar .pt-seg { flex: 1; }
+  .pt-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .pt-chip { border: 1px solid #2b313c; background: #0f1217; color: #c7cfdb; border-radius: 999px; padding: 3px 9px; cursor: pointer; font-size: 11px; }
+  .pt-chip:hover { border-color: #4a5568; color: #fff; }
+  .pt-chip[aria-pressed="true"] { background: #2a3a55; border-color: #3d5a8a; color: #dbe8ff; }
+  .pt-chip.pt-chip-muted { color: #8d96a5; }
+
+  details.pt-group { border: 1px solid #242933; border-radius: 8px; background: #111419; }
+  details.pt-group > summary { cursor: pointer; padding: 6px 8px; font-weight: 600; list-style: none; display: flex; justify-content: space-between; align-items: center; color: #d4dae4; }
+  details.pt-group > summary::-webkit-details-marker { display: none; }
+  details.pt-group > summary::after { content: "›"; color: #6b7485; transform: rotate(90deg); transition: transform .15s; }
+  details.pt-group[open] > summary::after { transform: rotate(-90deg); }
+  details.pt-group > .pt-rows { padding: 2px 0 6px; }
+  .pt-row { display: grid; grid-template-columns: 92px 1fr 46px; align-items: center; gap: 6px; padding: 3px 8px; }
+  .pt-row label { color: #b7bfcc; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; }
+  .pt-row label:hover { color: #fff; }
+  .pt-row input[type=range] { width: 100%; margin: 0; accent-color: #6ea8fe; height: 18px; }
+  .pt-row select { width: 100%; background: #0f1217; border: 1px solid #2b313c; border-radius: 6px; padding: 3px 4px; font-size: 11px; grid-column: 2 / span 2; }
+  .pt-row input[type=color] { width: 100%; height: 22px; padding: 0; border: 1px solid #2b313c; border-radius: 6px; background: #0f1217; grid-column: 2 / span 2; }
+  .pt-row .pt-seg { grid-column: 2 / span 2; }
+  .pt-row .pt-switch { grid-column: 2 / span 2; justify-self: start; }
+  .pt-switch { width: 34px; height: 18px; border-radius: 999px; background: #2b313c; border: 0; position: relative; cursor: pointer; padding: 0; }
+  .pt-switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #aab3c2; transition: transform .15s; }
+  .pt-switch[aria-pressed="true"] { background: #3d6fbf; } .pt-switch[aria-pressed="true"]::after { transform: translateX(16px); background: #fff; }
+  .pt-val { text-align: right; color: #9aa3b2; font-variant-numeric: tabular-nums; font-size: 11px; white-space: nowrap; display: flex; justify-content: flex-end; align-items: center; gap: 4px; }
+  .pt-dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid rgba(255,255,255,.25); display: inline-block; }
+  .pt-macro-hint { display: flex; justify-content: space-between; color: #6b7485; font-size: 10px; padding: 0 8px 4px 106px; margin-top: -4px; }
+
+  .pt-h { display: flex; justify-content: space-between; align-items: center; font-weight: 600; color: #d4dae4; font-size: 11.5px; margin: 2px 0 0; }
+  .pt-h .pt-mini { font-weight: 400; color: #8d96a5; font-size: 10.5px; }
+  textarea.pt-notes { width: 100%; min-height: 58px; resize: vertical; background: #0f1217; color: #e6e9ef; border: 1px solid #2b313c; border-radius: 8px; padding: 6px 8px; font-size: 11.5px; line-height: 1.4; user-select: text; }
+  textarea.pt-notes::placeholder { color: #5f6878; }
+  .pt-list { display: flex; flex-direction: column; gap: 3px; }
+  .pt-item { display: flex; gap: 6px; align-items: center; background: #0f1217; border: 1px solid #242933; border-radius: 7px; padding: 4px 6px; font-size: 11px; }
+  .pt-item .pt-item-main { flex: 1; min-width: 0; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pt-item .pt-item-main:hover { color: #fff; }
+  .pt-item .pt-item-sub { color: #8d96a5; }
+  .pt-item .pt-x { border: 0; background: transparent; color: #6b7485; cursor: pointer; padding: 0 2px; font-size: 13px; line-height: 1; }
+  .pt-item .pt-x:hover { color: #ff8da1; }
+  .pt-num { width: 16px; height: 16px; border-radius: 50%; background: #ff4d6d; color: #fff; font-size: 9.5px; font-weight: 700; display: inline-grid; place-items: center; flex: none; }
+  .pt-composer { background: #1b1f27; border: 1px solid #3d5a8a; border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .pt-composer .pt-composer-target { color: #8d96a5; font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .pt-composer input { width: 100%; background: #0f1217; border: 1px solid #2b313c; border-radius: 6px; padding: 5px 7px; user-select: text; }
+  .pt-actions { display: flex; gap: 6px; }
+  .pt-btn { flex: 1; border: 1px solid #2b313c; background: #1b1f27; color: #e6e9ef; border-radius: 8px; padding: 7px 8px; cursor: pointer; font-size: 11.5px; white-space: nowrap; }
+  .pt-btn:hover { background: #262c37; }
+  .pt-btn.pt-primary { background: #6ea8fe; border-color: #6ea8fe; color: #0b1220; font-weight: 700; }
+  .pt-btn.pt-primary:hover { background: #8dbbff; }
+  .pt-btn.pt-small { flex: none; padding: 4px 8px; font-size: 11px; }
+  .pt-annotate-hint { background: #3a2230; border: 1px solid #7a2d48; color: #ffd1db; border-radius: 8px; padding: 6px 8px; font-size: 11px; }
+  .pt-help { background: #111419; border: 1px solid #242933; border-radius: 8px; padding: 8px 10px; font-size: 11px; color: #c7cfdb; line-height: 1.5; }
+  .pt-help kbd { background: #262c37; border: 1px solid #3a4150; border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; font: 10.5px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: #e6e9ef; }
+  .pt-help ol { margin: 4px 0 0; padding-left: 16px; }
+  .pt-toast { position: fixed; z-index: 9700; left: 50%; bottom: 22px; transform: translateX(-50%) translateY(10px); background: #1b1f27; color: #fff; border: 1px solid #3d5a8a; border-radius: 999px; padding: 8px 14px; font: 12px ui-sans-serif, system-ui, sans-serif; box-shadow: 0 8px 24px rgba(0,0,0,.35); opacity: 0; transition: opacity .15s, transform .15s; pointer-events: none; }
+  .pt-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .pt-modal { position: fixed; inset: 0; z-index: 9600; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .pt-modal-box { background: #15181e; color: #e6e9ef; border: 1px solid #2b313c; border-radius: 12px; width: min(760px, 100%); max-height: 100%; display: flex; flex-direction: column; gap: 8px; padding: 12px; box-shadow: 0 24px 60px rgba(0,0,0,.5); font: 12px ui-sans-serif, system-ui, sans-serif; color-scheme: dark; }
+  .pt-modal textarea { width: 100%; height: min(480px, 70vh); background: #0f1217; color: #e6e9ef; border: 1px solid #2b313c; border-radius: 8px; padding: 8px; font: 11.5px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; resize: vertical; user-select: text; }
+  .pt-fatal { position: fixed; inset: 16px; z-index: 9999; background: #2a1016; color: #ffd1db; border: 1px solid #7a2d48; border-radius: 12px; padding: 16px 20px; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow: auto; }
+  @media (max-width: 420px) { #pt-deck { width: calc(100vw - 16px); } }
+</style>
+
+<div id="pt-stage" data-viewport="fit"></div>
+<div id="pt-pins"></div>
+<aside id="pt-deck" aria-label="Design Deck" data-collapsed="false"></aside>
+
+<script id="pt-harness">
+(function () {
+'use strict';
+const DECK_VERSION = '1.0.0';
+const HANDOFF_SCHEMA = 'ai-assist-prototype/handoff@1';
+
+/* ------------------------------------------------------------------ utils */
+const $ = (s, r) => (r || document).querySelector(s);
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const round = (v, d = 2) => Math.round(v * Math.pow(10, d)) / Math.pow(10, d);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const clone = (o) => JSON.parse(JSON.stringify(o));
+const uid = () => Math.random().toString(36).slice(2, 8);
+function el(tag, attrs, children) {
+  const n = document.createElement(tag);
+  if (attrs) for (const k of Object.keys(attrs)) {
+    const v = attrs[k];
+    if (v == null || v === false) continue;
+    if (k === 'class') n.className = v;
+    else if (k === 'text') n.textContent = v;
+    else if (k === 'html') n.innerHTML = v;
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of (children || [])) if (c != null) n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  return n;
+}
+function fatal(msg) {
+  document.body.appendChild(el('div', { class: 'pt-fatal', text: 'ai-assist-prototype harness: ' + msg }));
+  console.error('[ai-assist-prototype] ' + msg);
+}
+
+/* --------------------------------------------------------------- manifest */
+let manifest;
+try { manifest = JSON.parse($('#pt-manifest').textContent); }
+catch (e) { fatal('The manifest JSON (<script id="pt-manifest">) is invalid: ' + e.message); return; }
+if (!manifest || !Array.isArray(manifest.variants) || !manifest.variants.length) { fatal('The manifest needs a non-empty "variants" array.'); return; }
+manifest.id = manifest.id || 'prototype';
+manifest.name = manifest.name || 'Prototype';
+manifest.kind = manifest.kind === 'tui' ? 'tui' : 'web';
+const KIND = manifest.kind;
+const controlSetName = manifest.controls || KIND;
+
+/* ------------------------------------------------------------------ fonts */
+const FONTS = [
+  { label: 'Inter', cat: 'sans', stack: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif", gf: 'Inter:wght@300..900' },
+  { label: 'IBM Plex Sans', cat: 'sans', stack: "'IBM Plex Sans', system-ui, sans-serif", gf: 'IBM+Plex+Sans:wght@300;400;500;600;700' },
+  { label: 'Manrope', cat: 'sans', stack: "'Manrope', system-ui, sans-serif", gf: 'Manrope:wght@300..800' },
+  { label: 'Space Grotesk', cat: 'sans', stack: "'Space Grotesk', system-ui, sans-serif", gf: 'Space+Grotesk:wght@300..700' },
+  { label: 'DM Sans', cat: 'sans', stack: "'DM Sans', system-ui, sans-serif", gf: 'DM+Sans:opsz,wght@9..40,300..900' },
+  { label: 'Work Sans', cat: 'sans', stack: "'Work Sans', system-ui, sans-serif", gf: 'Work+Sans:wght@300..900' },
+  { label: 'Figtree', cat: 'sans', stack: "'Figtree', system-ui, sans-serif", gf: 'Figtree:wght@300..900' },
+  { label: 'Outfit', cat: 'sans', stack: "'Outfit', system-ui, sans-serif", gf: 'Outfit:wght@300..900' },
+  { label: 'Archivo', cat: 'sans', stack: "'Archivo', system-ui, sans-serif", gf: 'Archivo:wght@300..900' },
+  { label: 'Public Sans', cat: 'sans', stack: "'Public Sans', system-ui, sans-serif", gf: 'Public+Sans:wght@300..900' },
+  { label: 'Nunito', cat: 'sans', stack: "'Nunito', system-ui, sans-serif", gf: 'Nunito:wght@300..900' },
+  { label: 'Rubik', cat: 'sans', stack: "'Rubik', system-ui, sans-serif", gf: 'Rubik:wght@300..900' },
+  { label: 'Plus Jakarta Sans', cat: 'sans', stack: "'Plus Jakarta Sans', system-ui, sans-serif", gf: 'Plus+Jakarta+Sans:wght@300..800' },
+  { label: 'System UI', cat: 'sans', stack: "system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif", gf: null },
+  { label: 'Fraunces', cat: 'serif', stack: "'Fraunces', Georgia, serif", gf: 'Fraunces:opsz,wght@9..144,300..900' },
+  { label: 'Playfair Display', cat: 'serif', stack: "'Playfair Display', Georgia, serif", gf: 'Playfair+Display:wght@400..900' },
+  { label: 'Lora', cat: 'serif', stack: "'Lora', Georgia, serif", gf: 'Lora:wght@400..700' },
+  { label: 'Source Serif 4', cat: 'serif', stack: "'Source Serif 4', Georgia, serif", gf: 'Source+Serif+4:opsz,wght@8..60,300..900' },
+  { label: 'Newsreader', cat: 'serif', stack: "'Newsreader', Georgia, serif", gf: 'Newsreader:opsz,wght@6..72,300..800' },
+  { label: 'DM Serif Display', cat: 'serif', stack: "'DM Serif Display', Georgia, serif", gf: 'DM+Serif+Display' },
+  { label: 'Libre Baskerville', cat: 'serif', stack: "'Libre Baskerville', Georgia, serif", gf: 'Libre+Baskerville:wght@400;700' },
+  { label: 'Crimson Pro', cat: 'serif', stack: "'Crimson Pro', Georgia, serif", gf: 'Crimson+Pro:wght@300..900' },
+  { label: 'Instrument Serif', cat: 'serif', stack: "'Instrument Serif', Georgia, serif", gf: 'Instrument+Serif' },
+  { label: 'Georgia', cat: 'serif', stack: "Georgia, 'Times New Roman', serif", gf: null },
+  { label: 'JetBrains Mono', cat: 'mono', stack: "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace", gf: 'JetBrains+Mono:wght@300..800' },
+  { label: 'IBM Plex Mono', cat: 'mono', stack: "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace", gf: 'IBM+Plex+Mono:wght@300;400;500;600;700' },
+  { label: 'Fira Code', cat: 'mono', stack: "'Fira Code', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace", gf: 'Fira+Code:wght@300..700' },
+  { label: 'Space Mono', cat: 'mono', stack: "'Space Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace", gf: 'Space+Mono:wght@400;700' },
+  { label: 'DM Mono', cat: 'mono', stack: "'DM Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace", gf: 'DM+Mono:wght@300;400;500' },
+  { label: 'Courier Prime', cat: 'mono', stack: "'Courier Prime', 'Courier New', monospace", gf: 'Courier+Prime:wght@400;700' },
+  { label: 'System Mono', cat: 'mono', stack: "ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace", gf: null }
+];
+for (const f of (manifest.fonts || [])) if (f && f.label && f.stack) FONTS.push({ label: f.label, cat: f.cat || 'sans', stack: f.stack, gf: f.gf || null });
+const fontByLabel = (l) => FONTS.find((f) => f.label === l) || { label: l, cat: 'sans', stack: l + ', system-ui, sans-serif', gf: null };
+function fontLinkHref(labels) {
+  const fams = [...new Set(labels.map((l) => fontByLabel(l).gf).filter(Boolean))];
+  return fams.length ? 'https://fonts.googleapis.com/css2?' + fams.map((f) => 'family=' + f).join('&') + '&display=swap' : null;
+}
+function ensureFonts(doc, labels) {
+  const href = fontLinkHref(labels); if (!href || !doc || !doc.head) return;
+  if ([...doc.querySelectorAll('link[data-pt-fonts]')].some((l) => l.href === href)) return;
+  const link = doc.createElement('link'); link.rel = 'stylesheet'; link.href = href; link.setAttribute('data-pt-fonts', '1'); doc.head.appendChild(link);
+}
+
+/* ---------------------------------------------------------- TUI themes */
+const TUI_THEMES = {
+  'Default dark':     { bg: '#0f1115', fg: '#e6e6e6', dim: '#8b919a', accent: '#7aa2f7', accent2: '#bb9af7', sel: '#2a3146', border: '#3b4252', ok: '#9ece6a', warn: '#e0af68', err: '#f7768e' },
+  'Default light':    { bg: '#fbfbf9', fg: '#1f2328', dim: '#6e7781', accent: '#0969da', accent2: '#8250df', sel: '#ddf4ff', border: '#c9ced6', ok: '#1a7f37', warn: '#9a6700', err: '#cf222e' },
+  'Dracula':          { bg: '#282a36', fg: '#f8f8f2', dim: '#6272a4', accent: '#bd93f9', accent2: '#ff79c6', sel: '#44475a', border: '#6272a4', ok: '#50fa7b', warn: '#f1fa8c', err: '#ff5555' },
+  'Nord':             { bg: '#2e3440', fg: '#d8dee9', dim: '#4c566a', accent: '#88c0d0', accent2: '#81a1c1', sel: '#434c5e', border: '#4c566a', ok: '#a3be8c', warn: '#ebcb8b', err: '#bf616a' },
+  'Gruvbox dark':     { bg: '#282828', fg: '#ebdbb2', dim: '#928374', accent: '#fabd2f', accent2: '#83a598', sel: '#3c3836', border: '#504945', ok: '#b8bb26', warn: '#fe8019', err: '#fb4934' },
+  'Solarized dark':   { bg: '#002b36', fg: '#93a1a1', dim: '#586e75', accent: '#268bd2', accent2: '#2aa198', sel: '#073642', border: '#586e75', ok: '#859900', warn: '#b58900', err: '#dc322f' },
+  'Solarized light':  { bg: '#fdf6e3', fg: '#586e75', dim: '#93a1a1', accent: '#268bd2', accent2: '#2aa198', sel: '#eee8d5', border: '#93a1a1', ok: '#859900', warn: '#b58900', err: '#dc322f' },
+  'One dark':         { bg: '#282c34', fg: '#abb2bf', dim: '#5c6370', accent: '#61afef', accent2: '#c678dd', sel: '#3e4451', border: '#4b5263', ok: '#98c379', warn: '#e5c07b', err: '#e06c75' },
+  'Catppuccin mocha': { bg: '#1e1e2e', fg: '#cdd6f4', dim: '#6c7086', accent: '#89b4fa', accent2: '#cba6f7', sel: '#313244', border: '#45475a', ok: '#a6e3a1', warn: '#f9e2af', err: '#f38ba8' },
+  'Tokyo night':      { bg: '#1a1b26', fg: '#c0caf5', dim: '#565f89', accent: '#7aa2f7', accent2: '#bb9af7', sel: '#283457', border: '#3b4261', ok: '#9ece6a', warn: '#e0af68', err: '#f7768e' },
+  'Monochrome':       { bg: '#000000', fg: '#d0d0d0', dim: '#7a7a7a', accent: '#ffffff', accent2: '#bdbdbd', sel: '#2b2b2b', border: '#5a5a5a', ok: '#d0d0d0', warn: '#d0d0d0', err: '#ffffff' },
+  'Amber CRT':        { bg: '#140d00', fg: '#ffb000', dim: '#8a5f00', accent: '#ffd479', accent2: '#ffb000', sel: '#3a2800', border: '#6b4a00', ok: '#ffd479', warn: '#ffb000', err: '#ff7b00' },
+  'Green phosphor':   { bg: '#031a03', fg: '#33ff33', dim: '#1b8f1b', accent: '#b3ffb3', accent2: '#66ff66', sel: '#0c3a0c', border: '#1b8f1b', ok: '#66ff66', warn: '#ccff66', err: '#ff6666' }
+};
+for (const k of Object.keys(manifest.tuiThemes || {})) TUI_THEMES[k] = Object.assign({}, TUI_THEMES['Default dark'], manifest.tuiThemes[k]);
+const GLYPHS = {
+  single:  '─│┌┐└┘├┤┬┴┼',
+  rounded: '─│╭╮╰╯├┤┬┴┼',
+  double:  '═║╔╗╚╝╠╣╦╩╬',
+  heavy:   '━┃┏┓┗┛┣┫┳┻╋',
+  ascii:   '-|++++++++++',
+  none:    '           '
+};
+
+/* ------------------------------------------------------------ controls */
+const WEB_CONTROLS = [
+  { id: 'warmth', group: 'Feel', label: 'Warmth', type: 'range', min: -1, max: 1, step: 0.05, default: 0, macro: true, hint: ['cool', 'warm'], help: 'Macro dial: sets the neutral hue and tint of backgrounds, surfaces and borders.' },
+  { id: 'energy', group: 'Feel', label: 'Energy', type: 'range', min: 0, max: 1, step: 0.05, default: 0.5, macro: true, hint: ['calm', 'bold'], help: 'Macro dial: sets accent saturation, display weight, type scale, elevation, contrast and motion together.' },
+  { id: 'fontDisplay', group: 'Type', label: 'Display font', type: 'font', default: 'Inter' },
+  { id: 'fontBody', group: 'Type', label: 'Body font', type: 'font', default: 'Inter' },
+  { id: 'fontSize', group: 'Type', label: 'Base size', type: 'range', min: 13, max: 20, step: 0.5, default: 16, unit: 'px' },
+  { id: 'typeScale', group: 'Type', label: 'Type scale', type: 'range', min: 1.1, max: 1.5, step: 0.01, default: 1.25 },
+  { id: 'lineHeight', group: 'Type', label: 'Line height', type: 'range', min: 1.2, max: 1.9, step: 0.05, default: 1.55 },
+  { id: 'tracking', group: 'Type', label: 'Tracking', type: 'range', min: -0.04, max: 0.1, step: 0.005, default: 0, unit: 'em' },
+  { id: 'weightDisplay', group: 'Type', label: 'Display weight', type: 'range', min: 300, max: 900, step: 100, default: 700 },
+  { id: 'weightBody', group: 'Type', label: 'Body weight', type: 'range', min: 300, max: 600, step: 100, default: 400 },
+  { id: 'mode', group: 'Color', label: 'Mode', type: 'segment', options: ['light', 'dark'], default: 'light' },
+  { id: 'accentHue', group: 'Color', label: 'Accent hue', type: 'range', min: 0, max: 360, step: 1, default: 222, unit: '°', swatch: 'accent' },
+  { id: 'accentSat', group: 'Color', label: 'Accent sat.', type: 'range', min: 0, max: 100, step: 1, default: 78, unit: '%' },
+  { id: 'accentLight', group: 'Color', label: 'Accent light.', type: 'range', min: 25, max: 70, step: 1, default: 50, unit: '%' },
+  { id: 'accent2Shift', group: 'Color', label: '2nd hue shift', type: 'range', min: -180, max: 180, step: 5, default: 150, unit: '°', swatch: 'accent2' },
+  { id: 'neutralHue', group: 'Color', label: 'Neutral hue', type: 'range', min: 0, max: 360, step: 1, default: 222, unit: '°', swatch: 'bg' },
+  { id: 'neutralSat', group: 'Color', label: 'Neutral tint', type: 'range', min: 0, max: 30, step: 1, default: 8, unit: '%' },
+  { id: 'surfaceTint', group: 'Color', label: 'Surface depth', type: 'range', min: 0, max: 1, step: 0.05, default: 0.4 },
+  { id: 'contrast', group: 'Color', label: 'Contrast', type: 'range', min: 0.7, max: 1.3, step: 0.05, default: 1 },
+  { id: 'radius', group: 'Shape', label: 'Corner radius', type: 'range', min: 0, max: 32, step: 1, default: 10, unit: 'px' },
+  { id: 'borderWidth', group: 'Shape', label: 'Border width', type: 'range', min: 0, max: 3, step: 0.5, default: 1, unit: 'px' },
+  { id: 'elevation', group: 'Shape', label: 'Elevation', type: 'range', min: 0, max: 5, step: 0.5, default: 2 },
+  { id: 'density', group: 'Space', label: 'Density', type: 'range', min: 0.6, max: 1.6, step: 0.05, default: 1, hint: ['compact', 'airy'] },
+  { id: 'containerWidth', group: 'Space', label: 'Container', type: 'range', min: 640, max: 1600, step: 20, default: 1200, unit: 'px' },
+  { id: 'motion', group: 'Motion', label: 'Motion', type: 'range', min: 0, max: 2, step: 0.1, default: 1, hint: ['off', 'lively'] }
+];
+const TUI_CONTROLS = [
+  { id: 'tuiTheme', group: 'Theme', label: 'Theme', type: 'select', options: Object.keys(TUI_THEMES), default: 'Default dark' },
+  { id: 'tuiAccentHue', group: 'Theme', label: 'Accent override', type: 'range', min: -1, max: 360, step: 1, default: -1, unit: '°', swatch: 'tuiAccent', help: '-1 keeps the theme accent.' },
+  { id: 'tuiFont', group: 'Type', label: 'Font', type: 'font', cat: 'mono', default: 'JetBrains Mono' },
+  { id: 'tuiFontSize', group: 'Type', label: 'Font size', type: 'range', min: 11, max: 22, step: 0.5, default: 14, unit: 'px' },
+  { id: 'tuiLineHeight', group: 'Type', label: 'Line height', type: 'range', min: 1, max: 1.6, step: 0.05, default: 1.25 },
+  { id: 'tuiBold', group: 'Type', label: 'Bold headings', type: 'toggle', default: true },
+  { id: 'tuiCols', group: 'Terminal', label: 'Columns', type: 'range', min: 60, max: 200, step: 2, default: 100, unit: 'col' },
+  { id: 'tuiRows', group: 'Terminal', label: 'Rows', type: 'range', min: 20, max: 60, step: 1, default: 32, unit: 'row' },
+  { id: 'tuiBorders', group: 'Terminal', label: 'Border glyphs', type: 'select', options: Object.keys(GLYPHS), default: 'single' },
+  { id: 'tuiPadding', group: 'Terminal', label: 'Padding', type: 'range', min: 0, max: 3, step: 1, default: 1, unit: 'ch' },
+  { id: 'tuiCursor', group: 'Terminal', label: 'Cursor', type: 'select', options: ['block', 'bar', 'underline'], default: 'block' },
+  { id: 'tuiBlink', group: 'Terminal', label: 'Cursor blink', type: 'toggle', default: true },
+  { id: 'tuiChrome', group: 'Terminal', label: 'Window chrome', type: 'toggle', default: true },
+  { id: 'tuiScanlines', group: 'Terminal', label: 'CRT scanlines', type: 'toggle', default: false }
+];
+const VALID_TYPES = ['range', 'select', 'segment', 'toggle', 'font', 'color', 'text'];
+const hidden = new Set(manifest.hideControls || []);
+const CONTROLS = (controlSetName === 'tui' ? TUI_CONTROLS : WEB_CONTROLS).filter((c) => !hidden.has(c.id));
+for (const c of (manifest.extraControls || [])) {
+  if (!c || !c.id || CONTROLS.some((x) => x.id === c.id)) continue;
+  if (!VALID_TYPES.includes(c.type)) { console.warn('[ai-assist-prototype] extraControl "' + c.id + '" has unknown type "' + c.type + '", skipped'); continue; }
+  CONTROLS.push(Object.assign({ group: 'Custom', label: c.id }, c, { custom: true }));
+}
+const ctrlById = (id) => CONTROLS.find((c) => c.id === id);
+const CONTROL_DEFAULTS = {}; for (const c of CONTROLS) CONTROL_DEFAULTS[c.id] = c.default;
+
+/* -------------------------------------------------------------- presets */
+const BUILTIN_PRESETS = KIND === 'tui' ? {
+  'Default':   {},
+  'Hacker':    { tuiTheme: 'Green phosphor', tuiScanlines: true, tuiBorders: 'ascii', tuiFont: 'Courier Prime' },
+  'Retro':     { tuiTheme: 'Amber CRT', tuiScanlines: true, tuiBorders: 'double', tuiChrome: false },
+  'Modern':    { tuiTheme: 'Catppuccin mocha', tuiBorders: 'rounded', tuiFont: 'JetBrains Mono', tuiLineHeight: 1.35 },
+  'Minimal':   { tuiTheme: 'Monochrome', tuiBorders: 'none', tuiChrome: false, tuiBold: false },
+  'Paper':     { tuiTheme: 'Solarized light', tuiBorders: 'single', tuiFont: 'IBM Plex Mono' }
+} : {
+  'Neutral':   {},
+  'Calm':      { fontDisplay: 'Manrope', fontBody: 'Manrope', accentHue: 200, accentSat: 45, accentLight: 46, neutralHue: 210, neutralSat: 6, radius: 14, elevation: 1, density: 1.15, weightDisplay: 600, typeScale: 1.2, motion: 0.8, contrast: 0.95 },
+  'Bold':      { fontDisplay: 'Space Grotesk', fontBody: 'Inter', accentHue: 12, accentSat: 95, accentLight: 52, radius: 6, elevation: 3, weightDisplay: 800, typeScale: 1.33, contrast: 1.15, motion: 1.3, density: 0.95 },
+  'Editorial': { fontDisplay: 'Fraunces', fontBody: 'Source Serif 4', accentHue: 20, accentSat: 60, accentLight: 40, neutralHue: 40, neutralSat: 14, radius: 2, elevation: 0.5, borderWidth: 1, typeScale: 1.3, lineHeight: 1.65, density: 1.2, weightDisplay: 600, tracking: -0.01 },
+  'Playful':   { fontDisplay: 'Nunito', fontBody: 'Nunito', accentHue: 330, accentSat: 85, accentLight: 58, accent2Shift: 120, radius: 24, elevation: 2.5, weightDisplay: 800, density: 1.1, motion: 1.5, typeScale: 1.28 },
+  'Technical': { fontDisplay: 'IBM Plex Sans', fontBody: 'IBM Plex Sans', accentHue: 160, accentSat: 60, accentLight: 40, neutralHue: 220, neutralSat: 8, radius: 4, elevation: 1, density: 0.85, typeScale: 1.2, tracking: 0.005, weightDisplay: 600, fontSize: 15 },
+  'Midnight':  { mode: 'dark', fontDisplay: 'Outfit', fontBody: 'Inter', accentHue: 265, accentSat: 85, accentLight: 66, neutralHue: 250, neutralSat: 14, surfaceTint: 0.6, radius: 12, elevation: 3, motion: 1.2 },
+  'Mono':      { fontDisplay: 'JetBrains Mono', fontBody: 'IBM Plex Mono', accentSat: 0, accentLight: 22, neutralSat: 0, radius: 0, borderWidth: 1.5, elevation: 0, typeScale: 1.2, weightDisplay: 700 }
+};
+const PRESETS = Object.assign({}, BUILTIN_PRESETS, manifest.presets || {});
+
+/* --------------------------------------------------------------- macros */
+const MACROS = {
+  warmth(v) { const a = Math.abs(v); return { neutralHue: v >= 0 ? 35 : 215, neutralSat: Math.round(lerp(0, 18, a)) }; },
+  energy(v) { return { accentSat: Math.round(lerp(45, 96, v)), weightDisplay: Math.round(lerp(5, 8.49, v)) * 100, elevation: round(lerp(0.5, 4, v), 1), motion: round(lerp(0.4, 1.6, v), 1), typeScale: round(lerp(1.18, 1.34, v), 2), contrast: round(lerp(0.9, 1.15, v), 2) }; }
+};
+
+/* ---------------------------------------------------------------- state */
+const STORE_KEY = 'ai-assist-prototype:' + manifest.id;
+const variantDefaults = (vid) => {
+  const v = manifest.variants.find((x) => x.id === vid) || {};
+  return Object.assign({}, CONTROL_DEFAULTS, manifest.defaults || {}, v.tokens || {});
+};
+function freshState() {
+  const s = { v: manifest.variants[0].id, screen: {}, tokens: {}, macros: { warmth: 0, energy: 0.5 }, preset: {}, sync: true, viewport: 'fit', deck: { x: null, y: null, collapsed: false, open: {}, help: true }, notes: '', pins: [], snaps: [], annotate: false };
+  for (const v of manifest.variants) { s.tokens[v.id] = variantDefaults(v.id); s.preset[v.id] = null; }
+  return s;
+}
+let state = freshState();
+try {
+  const saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+  if (saved && typeof saved === 'object') {
+    const fresh = freshState();
+    state = Object.assign(fresh, saved, { deck: Object.assign(fresh.deck, saved.deck || {}), macros: Object.assign(fresh.macros, saved.macros || {}), tokens: fresh.tokens, preset: Object.assign(fresh.preset, saved.preset || {}) });
+    for (const v of manifest.variants) state.tokens[v.id] = Object.assign({}, fresh.tokens[v.id], (saved.tokens || {})[v.id] || {});
+    if (!manifest.variants.some((v) => v.id === state.v)) state.v = manifest.variants[0].id;
+    state.pins = Array.isArray(saved.pins) ? saved.pins : []; state.snaps = Array.isArray(saved.snaps) ? saved.snaps : [];
+    state.annotate = false;
+  }
+} catch (e) { /* storage unavailable: run in memory */ }
+const hashV = (location.hash.match(/[#&]v=([^&]+)/) || [])[1];
+if (hashV && manifest.variants.some((v) => v.id === hashV)) state.v = hashV;
+let saveTimer = null;
+function persist() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ } }
+function save() { clearTimeout(saveTimer); saveTimer = setTimeout(persist, 120); }
+window.addEventListener('pagehide', () => { clearTimeout(saveTimer); persist(); });
+
+const currentVariant = () => manifest.variants.find((v) => v.id === state.v);
+const currentTokens = () => state.tokens[state.v];
+
+/* -------------------------------------------------------------- derive */
+const hsl = (h, s, l, a) => a == null ? `hsl(${round(h, 1)} ${round(s, 1)}% ${round(l, 1)}%)` : `hsl(${round(h, 1)} ${round(s, 1)}% ${round(l, 1)}% / ${round(a, 3)})`;
+function deriveWeb(t) {
+  const light = t.mode !== 'dark';
+  const nH = +t.neutralHue, nS = +t.neutralSat, c = +t.contrast, tint = +t.surfaceTint;
+  const aH = +t.accentHue, aS = +t.accentSat, aL = +t.accentLight;
+  const bgL = light ? 100 - (1 + 5 * tint) : 4 + 8 * tint;
+  const surfL = light ? Math.min(100, bgL + 2 + 2 * tint) : bgL + 5;
+  const surf2L = light ? bgL - 3 - 2 * tint : bgL + 10;
+  const textL = light ? clamp(38 - 28 * c, 2, 35) : clamp(58 + 32 * c, 70, 98);
+  const mutedL = light ? clamp(textL + 36, 30, 62) : clamp(textL - 34, 45, 75);
+  const borderL = light ? clamp(bgL - 9 * c, 60, 95) : clamp(bgL + 11 * c, 12, 40);
+  const a2H = ((aH + +t.accent2Shift) % 360 + 360) % 360;
+  const e = +t.elevation, shA = light ? 0.07 : 0.4, shCol = (k) => hsl(nH, Math.min(100, nS + 10), light ? 15 : 0, shA * e * k);
+  const m = +t.motion, fs = +t.fontSize, sc = +t.typeScale, unit = 4 * +t.density, r = +t.radius;
+  const o = {
+    '--pt-font-display': fontByLabel(t.fontDisplay).stack,
+    '--pt-font-body': fontByLabel(t.fontBody).stack,
+    '--pt-font-mono': fontByLabel('JetBrains Mono').stack,
+    '--pt-size': fs + 'px', '--pt-lh': String(t.lineHeight), '--pt-tracking': t.tracking + 'em',
+    '--pt-weight-display': String(t.weightDisplay), '--pt-weight-body': String(t.weightBody),
+    '--pt-t-xs': round(fs / sc, 2) + 'px', '--pt-t-sm': round(fs / Math.sqrt(sc), 2) + 'px', '--pt-t-md': fs + 'px',
+    '--pt-t-lg': round(fs * sc, 2) + 'px', '--pt-t-xl': round(fs * Math.pow(sc, 2), 2) + 'px', '--pt-t-2xl': round(fs * Math.pow(sc, 3), 2) + 'px',
+    '--pt-t-3xl': round(fs * Math.pow(sc, 4), 2) + 'px', '--pt-t-4xl': round(fs * Math.pow(sc, 5), 2) + 'px', '--pt-t-5xl': round(fs * Math.pow(sc, 6), 2) + 'px',
+    '--pt-accent-h': String(aH), '--pt-accent-s': aS + '%', '--pt-accent-l': aL + '%', '--pt-neutral-h': String(nH), '--pt-neutral-s': nS + '%',
+    '--pt-bg': hsl(nH, nS, bgL), '--pt-surface': hsl(nH, nS, surfL), '--pt-surface-2': hsl(nH, nS, surf2L),
+    '--pt-text': hsl(nH, Math.min(nS, 20), textL), '--pt-text-muted': hsl(nH, Math.min(nS, 20), mutedL), '--pt-border-color': hsl(nH, nS, borderL),
+    '--pt-accent': hsl(aH, aS, aL), '--pt-accent-hover': hsl(aH, aS, light ? aL - 7 : aL + 7),
+    '--pt-accent-soft': hsl(aH, aS * 0.9, light ? 94 : 18), '--pt-accent-soft-text': hsl(aH, aS, light ? 28 : 82),
+    '--pt-on-accent': aL > 62 ? hsl(aH, 40, 10) : '#ffffff', '--pt-accent-2': hsl(a2H, aS, aL),
+    '--pt-ok': hsl(150, clamp(aS, 50, 85), light ? 36 : 60), '--pt-warn': hsl(38, clamp(aS, 60, 90), light ? 44 : 62), '--pt-err': hsl(2, clamp(aS, 60, 85), light ? 48 : 64),
+    '--pt-shadow-sm': e > 0 ? `0 1px 2px ${shCol(0.8)}` : 'none',
+    '--pt-shadow-md': e > 0 ? `0 2px 6px -1px ${shCol(1)}, 0 8px 20px -4px ${shCol(0.8)}` : 'none',
+    '--pt-shadow-lg': e > 0 ? `0 12px 32px -8px ${shCol(1.4)}` : 'none',
+    '--pt-space-unit': round(unit, 2) + 'px',
+    '--pt-radius': r + 'px', '--pt-radius-sm': round(r * 0.5) + 'px', '--pt-radius-lg': round(r * 1.5) + 'px', '--pt-radius-xl': round(r * 2.5) + 'px', '--pt-radius-full': '9999px',
+    '--pt-border': t.borderWidth + 'px', '--pt-container': t.containerWidth + 'px',
+    '--pt-motion': String(m), '--pt-dur-fast': Math.round(120 * m) + 'ms', '--pt-dur-mid': Math.round(220 * m) + 'ms', '--pt-dur-slow': Math.round(420 * m) + 'ms', '--pt-ease': 'cubic-bezier(.2,.7,.2,1)'
+  };
+  [4, 8, 12, 16, 24, 32, 48, 64, 96].forEach((px, i) => { o['--pt-s-' + (i + 1)] = round(px / 4 * unit, 2) + 'px'; });
+  return o;
+}
+function hexToHsl(hex) {
+  const m = hex.replace('#', ''); const n = parseInt(m.length === 3 ? m.split('').map((c) => c + c).join('') : m, 16);
+  const r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b); let h = 0, s = 0; const l = (max + min) / 2;
+  if (max !== min) { const d = max - min; s = l > 0.5 ? d / (2 - max - min) : d / (max + min); h = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; }
+  return [h, s * 100, l * 100];
+}
+function deriveTui(t) {
+  const th = TUI_THEMES[t.tuiTheme] || TUI_THEMES['Default dark'];
+  const [, , bgL] = hexToHsl(th.bg); const dark = bgL < 50;
+  let accent = th.accent; if (+t.tuiAccentHue >= 0) accent = hsl(+t.tuiAccentHue, 75, dark ? 68 : 42);
+  const o = {
+    '--pt-tui-bg': th.bg, '--pt-tui-fg': th.fg, '--pt-tui-dim': th.dim, '--pt-tui-accent': accent, '--pt-tui-accent2': th.accent2, '--pt-tui-sel': th.sel,
+    '--pt-tui-border': th.border, '--pt-tui-ok': th.ok, '--pt-tui-warn': th.warn, '--pt-tui-err': th.err, '--pt-tui-cursor': accent,
+    '--pt-tui-backdrop': dark ? hsl(hexToHsl(th.bg)[0], Math.min(hexToHsl(th.bg)[1], 30), Math.max(0, bgL - 4)) : hsl(hexToHsl(th.bg)[0], Math.min(hexToHsl(th.bg)[1], 30), Math.min(100, bgL - 6)),
+    '--pt-tui-font': fontByLabel(t.tuiFont).stack, '--pt-tui-size': t.tuiFontSize + 'px', '--pt-tui-lh': String(t.tuiLineHeight),
+    '--pt-tui-cols': String(t.tuiCols), '--pt-tui-rows': String(t.tuiRows), '--pt-tui-pad': String(t.tuiPadding),
+    '--pt-font-mono': fontByLabel(t.tuiFont).stack
+  };
+  return o;
+}
+function deriveCustom(t) {
+  const o = {};
+  for (const c of CONTROLS) if (c.custom && c.var && /^--/.test(c.var)) {
+    const v = t[c.id]; o[c.var] = c.type === 'toggle' ? (v ? '1' : '0') : c.type === 'font' ? fontByLabel(v).stack : (c.type === 'range' && c.unit && c.unit !== '°' ? v + c.unit : String(v));
+  }
+  return o;
+}
+const derive = (t) => Object.assign(KIND === 'tui' ? deriveTui(t) : deriveWeb(t), deriveCustom(t));
+function htmlAttrs(t) {
+  const a = { 'data-kind': KIND, 'data-variant': state.v, 'data-mode': KIND === 'tui' ? (hexToHsl((TUI_THEMES[t.tuiTheme] || TUI_THEMES['Default dark']).bg)[2] < 50 ? 'dark' : 'light') : (t.mode || 'light') };
+  if (KIND === 'tui') { a['data-tui-cursor'] = t.tuiCursor; a['data-tui-blink'] = String(!!t.tuiBlink); a['data-tui-chrome'] = String(!!t.tuiChrome); a['data-tui-scanlines'] = String(!!t.tuiScanlines); a['data-tui-borders'] = t.tuiBorders; a['data-tui-bold'] = String(!!t.tuiBold); }
+  return a;
+}
+
+/* ----------------------------------------------------------- base CSS */
+const BASE_CSS = `
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;font-family:var(--pt-font-body);font-size:var(--pt-size);line-height:var(--pt-lh);letter-spacing:var(--pt-tracking);font-weight:var(--pt-weight-body);color:var(--pt-text);background:var(--pt-bg);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,h5,h6{font-family:var(--pt-font-display);font-weight:var(--pt-weight-display);line-height:1.15;letter-spacing:calc(var(--pt-tracking) - .01em);margin:0 0 .5em;text-wrap:balance}
+h1{font-size:var(--pt-t-3xl)}h2{font-size:var(--pt-t-2xl)}h3{font-size:var(--pt-t-xl)}h4{font-size:var(--pt-t-lg)}
+p{margin:0 0 1em}img,svg,video{max-width:100%;display:block}
+a{color:var(--pt-accent)}code,kbd,pre{font-family:var(--pt-font-mono);font-size:.92em}
+button,input,select,textarea{font:inherit;color:inherit;letter-spacing:inherit}
+:focus-visible{outline:2px solid var(--pt-accent);outline-offset:2px}
+::selection{background:var(--pt-accent-soft);color:var(--pt-accent-soft-text)}
+[data-screen][hidden]{display:none!important}
+.pt-container{max-width:var(--pt-container);margin-inline:auto;padding-inline:var(--pt-s-5)}
+.pt-card{background:var(--pt-surface);border:var(--pt-border) solid var(--pt-border-color);border-radius:var(--pt-radius);box-shadow:var(--pt-shadow-sm);padding:var(--pt-s-5)}
+.pt-btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--pt-s-2);padding:calc(var(--pt-s-2) + 2px) var(--pt-s-4);border-radius:var(--pt-radius);border:var(--pt-border) solid var(--pt-border-color);background:var(--pt-surface);color:var(--pt-text);font-weight:600;cursor:pointer;line-height:1.2;text-decoration:none;transition:background var(--pt-dur-fast) var(--pt-ease),transform var(--pt-dur-fast) var(--pt-ease),box-shadow var(--pt-dur-fast) var(--pt-ease)}
+.pt-btn:hover{background:var(--pt-surface-2)}
+.pt-btn-primary{background:var(--pt-accent);border-color:var(--pt-accent);color:var(--pt-on-accent);box-shadow:var(--pt-shadow-sm)}
+.pt-btn-primary:hover{background:var(--pt-accent-hover);border-color:var(--pt-accent-hover)}
+.pt-btn-ghost{background:transparent;border-color:transparent}
+.pt-btn-ghost:hover{background:var(--pt-surface-2)}
+.pt-input{width:100%;padding:calc(var(--pt-s-2) + 2px) var(--pt-s-3);border-radius:var(--pt-radius-sm);border:var(--pt-border) solid var(--pt-border-color);background:var(--pt-surface);color:var(--pt-text)}
+.pt-input::placeholder{color:var(--pt-text-muted)}
+.pt-badge{display:inline-block;padding:2px var(--pt-s-2);border-radius:var(--pt-radius-full);background:var(--pt-accent-soft);color:var(--pt-accent-soft-text);font-size:var(--pt-t-xs);font-weight:600;line-height:1.4;letter-spacing:.02em}
+.pt-muted{color:var(--pt-text-muted)}
+.pt-eyebrow{font-size:var(--pt-t-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--pt-accent)}
+.pt-divider{border:0;border-top:var(--pt-border) solid var(--pt-border-color);margin:var(--pt-s-5) 0}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
+/* ---- TUI ---- */
+html[data-kind="tui"] body{background:var(--pt-tui-backdrop);color:var(--pt-tui-fg);font-family:var(--pt-tui-font)}
+.tui-stage{min-height:100vh;display:grid;place-items:center;padding:24px;box-sizing:border-box}
+.tui-window{position:relative;display:inline-block;max-width:100%;background:var(--pt-tui-bg);border:1px solid var(--pt-tui-border);border-radius:8px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.45)}
+html[data-tui-chrome="false"] .tui-window{border-radius:0;box-shadow:none;border-color:transparent}
+.tui-titlebar{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--pt-tui-sel);color:var(--pt-tui-dim);font:12px/1 var(--pt-tui-font);border-bottom:1px solid var(--pt-tui-border)}
+.tui-titlebar .dots{display:inline-flex;gap:6px}.tui-titlebar .dots i{width:10px;height:10px;border-radius:50%;display:inline-block;background:#ff5f57}.tui-titlebar .dots i:nth-child(2){background:#febc2e}.tui-titlebar .dots i:nth-child(3){background:#28c840}
+.tui-titlebar .title{flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html[data-tui-chrome="false"] .tui-titlebar{display:none}
+.tui{font-family:var(--pt-tui-font);font-size:var(--pt-tui-size);line-height:var(--pt-tui-lh);color:var(--pt-tui-fg);background:var(--pt-tui-bg);white-space:pre;margin:0;padding:calc(var(--pt-tui-pad) * .6em) calc(var(--pt-tui-pad) * 1ch);width:max-content;min-width:calc(var(--pt-tui-cols) * 1ch + var(--pt-tui-pad) * 2ch);max-width:100%;min-height:calc(var(--pt-tui-rows) * var(--pt-tui-lh) * 1em + var(--pt-tui-pad) * 1.2em);overflow:auto;tab-size:4;font-variant-ligatures:none;letter-spacing:0}
+.tui .fg-accent,.tui .accent{color:var(--pt-tui-accent)}.tui .fg-accent2,.tui .accent2{color:var(--pt-tui-accent2)}.tui .fg-dim,.tui .dim{color:var(--pt-tui-dim)}.tui .fg-ok,.tui .ok{color:var(--pt-tui-ok)}.tui .fg-warn,.tui .warn{color:var(--pt-tui-warn)}.tui .fg-err,.tui .err{color:var(--pt-tui-err)}
+.tui .bg-sel,.tui .sel{background:var(--pt-tui-sel)}.tui .bg-accent{background:var(--pt-tui-accent);color:var(--pt-tui-bg)}.tui .inv{background:var(--pt-tui-fg);color:var(--pt-tui-bg)}.tui .bold,.tui b{font-weight:700}.tui .ul{text-decoration:underline}.tui .it{font-style:italic}
+html[data-tui-bold="false"] .tui .bold,html[data-tui-bold="false"] .tui b{font-weight:400}
+.tui .cursor{display:inline-block;min-width:1ch}
+html[data-tui-cursor="block"] .tui .cursor{background:var(--pt-tui-cursor);color:var(--pt-tui-bg)}
+html[data-tui-cursor="bar"] .tui .cursor{box-shadow:inset 2px 0 0 var(--pt-tui-cursor)}
+html[data-tui-cursor="underline"] .tui .cursor{box-shadow:inset 0 -2px 0 var(--pt-tui-cursor)}
+html[data-tui-blink="true"] .tui .cursor{animation:pt-blink 1.1s steps(1) infinite}
+@keyframes pt-blink{50%{background:transparent;box-shadow:none;color:inherit}}
+html[data-tui-scanlines="true"] .tui-window::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px);mix-blend-mode:multiply}
+`;
+
+/* ---------------------------------------------------------------- stage */
+const stage = $('#pt-stage'), pinsLayer = $('#pt-pins'), deck = $('#pt-deck');
+const VIEWPORTS = { fit: { label: 'Fit' }, mobile: { w: 390, h: 844, label: '390' }, tablet: { w: 820, h: 1180, label: '820' }, laptop: { w: 1280, h: 800, label: '1280' }, desktop: { w: 1536, h: 960, label: '1536' } };
+let frame = null, frameDoc = null, bridgeListeners = { tokens: [], screen: [], ready: [] };
+let mountSeq = 0, mountReady = Promise.resolve(), mountResolve = () => {};
+window.__PT_BRIDGE__ = function (win) {
+  return {
+    version: DECK_VERSION,
+    root: win.document,
+    go(screenId) { setScreen(screenId); },
+    screen() { return currentScreen(); },
+    tokens() { return Object.assign({}, currentTokens()); },
+    vars() { return derive(currentTokens()); },
+    variant() { return clone(currentVariant()); },
+    on(evt, fn) { if (bridgeListeners[evt] && typeof fn === 'function') bridgeListeners[evt].push(fn); },
+    note(text) { state.notes = (state.notes ? state.notes + '\n' : '') + String(text); save(); renderNotes(); }
+  };
+};
+function variantHTML(v) {
+  const tpl = document.querySelector('template[data-variant="' + CSS.escape(v.id) + '"]');
+  if (!tpl) return '<main style="padding:2rem;font-family:system-ui;color:#b00"><h1>Missing variant</h1><p>No <code>&lt;template data-variant="' + esc(v.id) + '"&gt;</code> found for variant <b>' + esc(v.name || v.id) + '</b>.</p></main>';
+  return tpl.innerHTML;
+}
+function screensOf(v) {
+  if (Array.isArray(v.screens) && v.screens.length) return v.screens.map((s) => typeof s === 'string' ? { id: s, name: s } : s);
+  if (frameDoc && frameDoc.documentElement.getAttribute('data-variant') === v.id) {
+    const seen = []; frameDoc.querySelectorAll('[data-screen]').forEach((n) => { const id = n.getAttribute('data-screen'); if (id && !seen.some((s) => s.id === id)) seen.push({ id, name: n.getAttribute('data-screen-name') || id }); });
+    return seen;
+  }
+  return [];
+}
+function currentScreen() { const v = currentVariant(); const sc = screensOf(v); if (!sc.length) return null; const cur = state.screen[v.id]; return sc.some((s) => s.id === cur) ? cur : sc[0].id; }
+function mount() {
+  const v = currentVariant(); const t = currentTokens(); bridgeListeners = { tokens: [], screen: [], ready: [] };
+  stage.innerHTML = ''; stage.setAttribute('data-viewport', state.viewport);
+  frame = el('iframe', { id: 'pt-frame', title: v.name || v.id });
+  const vp = VIEWPORTS[state.viewport] || VIEWPORTS.fit;
+  if (vp.w) {
+    const dev = el('div', { class: 'pt-device' }, [frame]); frame.style.width = vp.w + 'px'; frame.style.height = vp.h + 'px';
+    stage.appendChild(el('div', { class: 'pt-device-wrap' }, [el('div', { class: 'pt-device-label', text: vp.w + ' × ' + vp.h }), dev]));
+  } else stage.appendChild(frame);
+  frameDoc = frame.contentDocument;
+  const vars = derive(t); const attrs = htmlAttrs(t);
+  const attrStr = Object.keys(attrs).map((k) => k + '="' + esc(attrs[k]) + '"').join(' ');
+  const styleStr = Object.keys(vars).map((k) => k + ':' + vars[k]).join(';');
+  const fontHref = fontLinkHref(fontLabelsInUse(t));
+  frameDoc.open();
+  frameDoc.write('<!doctype html><html lang="en" ' + attrStr + ' style="' + esc(styleStr) + '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + esc(v.name || v.id) + '</title>' +
+    (fontHref ? '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" data-pt-fonts="1" href="' + esc(fontHref) + '">' : '') +
+    '<style id="pt-base">' + BASE_CSS + '</style><script>window.PT = parent.__PT_BRIDGE__(window);<\/script></head><body>' + variantHTML(v) + '</body></html>');
+  frameDoc.close();
+  frame.contentWindow.addEventListener('error', (e) => { setStatus('⚠ variant script error: ' + (e.message || e), 'err'); console.error('[ai-assist-prototype] variant "' + v.id + '" error:', e.error || e.message); });
+  frameDoc.addEventListener('keydown', onKey, true);
+  frameDoc.addEventListener('scroll', scheduleLayoutPins, true);
+  frameDoc.addEventListener('click', onFrameClick, true);
+  frameDoc.addEventListener('mouseover', onFrameHover, true);
+  frameDoc.addEventListener('mouseout', onFrameHoverOut, true);
+  // Browsers may parse document.write() content asynchronously for a freshly inserted iframe, so
+  // everything that needs the variant's DOM waits for readiness (see __PT__.ready()).
+  const my = ++mountSeq; let done = false;
+  mountReady = new Promise((r) => { mountResolve = r; });
+  const isReady = () => frameDoc.readyState === 'complete' && frameDoc.body && frameDoc.body.childElementCount > 0;
+  const finish = () => {
+    if (done || my !== mountSeq) return; done = true;
+    applyScreen(); applyTui(); renderNav(); scheduleLayoutPins();
+    if (state.annotate) frameDoc.documentElement.style.cursor = 'crosshair';
+    for (const fn of bridgeListeners.ready) { try { fn(); } catch (e) { console.error(e); } }
+    mountResolve();
+  };
+  if (isReady()) finish();
+  else {
+    frame.addEventListener('load', finish, { once: true });
+    let n = 0; const poll = () => { if (done || my !== mountSeq) return; if (isReady()) finish(); else if (n++ < 150) setTimeout(poll, 20); else finish(); };
+    setTimeout(poll, 0);
+  }
+  try { location.hash = 'v=' + encodeURIComponent(v.id); } catch (e) { /* ignore */ }
+}
+function fontLabelsInUse(t) { const out = []; for (const c of CONTROLS) if (c.type === 'font') out.push(t[c.id]); return out; }
+function applyTokens() {
+  if (!frameDoc) return; const t = currentTokens(); const vars = derive(t); const root = frameDoc.documentElement;
+  for (const k of Object.keys(vars)) root.style.setProperty(k, vars[k]);
+  const attrs = htmlAttrs(t); for (const k of Object.keys(attrs)) root.setAttribute(k, attrs[k]);
+  ensureFonts(frameDoc, fontLabelsInUse(t)); applyTui();
+  for (const fn of bridgeListeners.tokens) { try { fn(Object.assign({}, t), vars); } catch (e) { console.error(e); } }
+  scheduleLayoutPins();
+}
+function applyScreen() {
+  if (!frameDoc) return; const sc = currentScreen(); if (sc == null) return;
+  frameDoc.querySelectorAll('[data-screen]').forEach((n) => { if (n.getAttribute('data-screen') === sc) n.removeAttribute('hidden'); else n.setAttribute('hidden', ''); });
+  for (const fn of bridgeListeners.screen) { try { fn(sc); } catch (e) { console.error(e); } }
+}
+function setScreen(id) { const v = currentVariant(); if (!screensOf(v).some((s) => s.id === id)) return; state.screen[v.id] = id; save(); applyScreen(); renderNav(); scheduleLayoutPins(); }
+function applyTui() {
+  if (KIND !== 'tui' || !frameDoc) return; const t = currentTokens(); const map = GLYPHS[t.tuiBorders] || GLYPHS.single; const base = GLYPHS.single;
+  frameDoc.querySelectorAll('.tui').forEach((pre) => {
+    const walker = frameDoc.createTreeWalker(pre, NodeFilter.SHOW_TEXT); let n;
+    while ((n = walker.nextNode())) { if (n.__ptOrig == null) n.__ptOrig = n.data; let s = ''; for (const ch of n.__ptOrig) { const i = base.indexOf(ch); s += i >= 0 ? map[i] : ch; } if (n.data !== s) n.data = s; }
+  });
+}
+
+/* --------------------------------------------------------------- deck UI */
+const ui = {};
+function buildDeck() {
+  deck.innerHTML = '';
+  const head = el('div', { class: 'pt-deck-head', title: 'Drag to move. Press ` to collapse.' }, [
+    el('span', { class: 'pt-grip', text: '⋮⋮' }),
+    el('div', { class: 'pt-deck-title' }, [el('span', { text: manifest.name }), el('small', { class: 'pt-deck-title-sub', text: (KIND === 'tui' ? 'TUI prototype' : 'Prototype') + ' · Design Deck' })]),
+    ui.btnAnnotate = el('button', { class: 'pt-icon-btn', title: 'Pin comments on elements (Shift+A)', 'aria-pressed': 'false', text: '📍', onclick: () => toggleAnnotate() }),
+    ui.btnHelp = el('button', { class: 'pt-icon-btn', title: 'Help', text: '?', onclick: () => { state.deck.help = !state.deck.help; save(); renderHelp(); } }),
+    ui.btnCollapse = el('button', { class: 'pt-icon-btn', title: 'Collapse (`)', text: '–', onclick: (e) => { e.stopPropagation(); setCollapsed(!state.deck.collapsed); } })
+  ]);
+  head.addEventListener('pointerdown', startDrag);
+  const body = el('div', { class: 'pt-deck-body' });
+  ui.help = el('div', { class: 'pt-help' });
+  ui.nav = el('div');
+  ui.toolbar = el('div', { class: 'pt-toolbar' });
+  ui.presets = el('div');
+  ui.groups = el('div', { style: 'display:flex;flex-direction:column;gap:6px' });
+  ui.annotateBox = el('div');
+  ui.notesWrap = el('div');
+  ui.snapsWrap = el('div');
+  ui.pinsWrap = el('div');
+  body.append(ui.help, ui.nav, ui.toolbar, ui.presets, ui.groups, ui.annotateBox, ui.pinsWrap, ui.notesWrap, ui.snapsWrap);
+  const foot = el('div', { class: 'pt-deck-foot' }, [
+    el('div', { class: 'pt-actions' }, [
+      el('button', { class: 'pt-btn pt-primary', text: 'Export to LLM', title: 'Copy a handoff block describing the chosen variant and all dial values (Shift+E)', onclick: () => exportHandoff('text') }),
+      el('button', { class: 'pt-btn', text: 'JSON', title: 'Copy the handoff JSON only', onclick: () => exportHandoff('json') }),
+      el('button', { class: 'pt-btn', text: 'View', title: 'Show the handoff in a window (manual copy)', onclick: () => showModal(buildHandoffText()) })
+    ]),
+    el('div', { class: 'pt-actions' }, [
+      el('button', { class: 'pt-btn', text: '+ Snapshot', title: 'Save the current variant + dials to compare later (Shift+S)', onclick: () => addSnapshot() }),
+      el('button', { class: 'pt-btn', text: 'Reset dials', title: 'Reset dials to this variant\'s defaults' + (state.sync ? ' (all variants while Sync is on)' : ''), onclick: () => resetTokens() })
+    ]),
+    ui.status = el('div', { class: 'pt-status' }, [ui.statusL = el('span', { text: '' }), el('span', { text: 'deck v' + DECK_VERSION })])
+  ]);
+  deck.append(head, body, foot);
+  renderAll();
+}
+function renderAll() { renderHelp(); renderNav(); renderToolbar(); renderPresets(); renderGroups(); renderAnnotateBox(); renderPins(); renderNotes(); renderSnaps(); setCollapsed(state.deck.collapsed, true); placeDeck(); }
+function renderHelp() {
+  ui.help.style.display = state.deck.help ? '' : 'none'; if (!state.deck.help) return;
+  ui.help.innerHTML = '<b>How to use this prototype</b><ol><li>Flip variants with <kbd>←</kbd> <kbd>→</kbd> (structure differs per variant).</li><li>Tune the feel with presets and dials; try the viewport sizes' + (KIND === 'tui' ? '' : ' and light/dark') + '.</li><li>Type notes, or click 📍 then click any element to pin a comment.</li><li>Press <b>Export to LLM</b> and paste the block into your AI agent.</li></ol><div style="margin-top:4px;color:#8d96a5">Shortcuts: <kbd>`</kbd> collapse · <kbd>[</kbd> <kbd>]</kbd> screens · <kbd>Shift</kbd>+<kbd>A</kbd> annotate · <kbd>Shift</kbd>+<kbd>E</kbd> export · <kbd>Shift</kbd>+<kbd>S</kbd> snapshot · double-click a dial label to reset it.</div>';
+}
+function renderNav() {
+  const v = currentVariant(); const i = manifest.variants.indexOf(v); const n = manifest.variants.length;
+  ui.nav.innerHTML = '';
+  ui.nav.append(el('div', { class: 'pt-nav' }, [
+    el('button', { class: 'pt-icon-btn', title: 'Previous variant (←)', text: '◀', disabled: n < 2, onclick: () => stepVariant(-1) }),
+    el('div', { class: 'pt-nav-name', title: v.name || v.id }, [el('span', { text: (v.name || v.id) }), el('small', { text: '  ' + (i + 1) + '/' + n })]),
+    el('button', { class: 'pt-icon-btn', title: 'Next variant (→)', text: '▶', disabled: n < 2, onclick: () => stepVariant(1) })
+  ]));
+  if (v.thesis) ui.nav.append(el('div', { class: 'pt-thesis', text: v.thesis }));
+  const sc = screensOf(v);
+  if (sc.length > 1) {
+    const cur = currentScreen(); const seg = el('div', { class: 'pt-seg', style: 'margin-top:6px' });
+    for (const s of sc) seg.append(el('button', { text: s.name || s.id, 'aria-pressed': String(s.id === cur), onclick: () => setScreen(s.id) }));
+    ui.nav.append(seg);
+  }
+}
+function renderToolbar() {
+  ui.toolbar.innerHTML = '';
+  const seg = el('div', { class: 'pt-seg', title: 'Viewport width' });
+  for (const k of Object.keys(VIEWPORTS)) seg.append(el('button', { text: VIEWPORTS[k].label, 'aria-pressed': String(state.viewport === k), onclick: () => { state.viewport = k; save(); mount(); renderToolbar(); } }));
+  ui.toolbar.append(seg);
+  const modeCtrl = ctrlById('mode');
+  if (modeCtrl) ui.toolbar.append(el('button', { class: 'pt-icon-btn', title: 'Toggle light / dark', text: currentTokens().mode === 'dark' ? '☾' : '☀', onclick: () => setToken('mode', currentTokens().mode === 'dark' ? 'light' : 'dark') }));
+  ui.toolbar.append(el('button', { class: 'pt-icon-btn', title: 'Sync dials across variants: ' + (state.sync ? 'on' : 'off'), text: '🔗', 'aria-pressed': String(state.sync), onclick: () => { state.sync = !state.sync; save(); renderToolbar(); toast('Dial sync ' + (state.sync ? 'on: changes apply to every variant' : 'off: changes apply to this variant only')); } }));
+}
+function renderPresets() {
+  ui.presets.innerHTML = ''; const names = Object.keys(PRESETS); if (!names.length) return;
+  const cur = state.preset[state.v]; const chips = el('div', { class: 'pt-chips' });
+  for (const name of names) chips.append(el('button', { class: 'pt-chip', text: name, 'aria-pressed': String(cur === name && !presetModified()), title: Object.keys(PRESETS[name]).length ? Object.keys(PRESETS[name]).map((k) => k + ': ' + PRESETS[name][k]).join(', ') : 'Variant defaults', onclick: () => applyPreset(name) }));
+  ui.presets.append(el('div', { class: 'pt-h' }, [el('span', { text: 'Presets' }), el('span', { class: 'pt-mini', text: cur ? (cur + (presetModified() ? ' · modified' : '')) : 'custom' })]), chips);
+}
+function presetModified() {
+  const name = state.preset[state.v]; if (!name || !PRESETS[name]) return false;
+  const base = Object.assign({}, variantDefaults(state.v), PRESETS[name]); const t = currentTokens();
+  return CONTROLS.some((c) => !c.macro && String(t[c.id]) !== String(base[c.id]));
+}
+function renderGroups() {
+  ui.groups.innerHTML = ''; const t = currentTokens(); const groups = [];
+  for (const c of CONTROLS) if (!groups.includes(c.group)) groups.push(c.group);
+  for (const g of groups) {
+    const open = state.deck.open[g] != null ? state.deck.open[g] : (g === 'Feel' || g === 'Theme' || g === 'Type');
+    const det = el('details', { class: 'pt-group', open: open ? '' : null, ontoggle: (e) => { state.deck.open[g] = e.target.open; save(); } });
+    det.append(el('summary', { text: g }));
+    const rows = el('div', { class: 'pt-rows' });
+    for (const c of CONTROLS.filter((x) => x.group === g)) { rows.append(controlRow(c, c.macro ? state.macros[c.id] : t[c.id])); if (c.hint) rows.append(el('div', { class: 'pt-macro-hint' }, [el('span', { text: c.hint[0] }), el('span', { text: c.hint[1] })])); }
+    det.append(rows); ui.groups.append(det);
+  }
+}
+function fmtVal(c, v) {
+  if (c.type === 'range') { const d = (String(c.step).split('.')[1] || '').length; return round(+v, d) + (c.unit && c.unit !== 'col' && c.unit !== 'row' ? c.unit : ''); }
+  if (c.type === 'toggle') return v ? 'on' : 'off'; return String(v);
+}
+function controlRow(c, val) {
+  const row = el('div', { class: 'pt-row', 'data-id': c.id });
+  const label = el('label', { text: c.label, title: (c.help ? c.help + ' ' : '') + 'Double-click to reset.', ondblclick: () => resetControl(c) });
+  row.append(label);
+  const onChange = (v) => c.macro ? setMacro(c.id, v) : setToken(c.id, v);
+  if (c.type === 'range') {
+    const inp = el('input', { type: 'range', min: c.min, max: c.max, step: c.step, value: val });
+    const out = el('div', { class: 'pt-val' }); const dot = c.swatch ? el('span', { class: 'pt-dot' }) : null; const txt = el('span', { text: fmtVal(c, val) });
+    if (dot) out.append(dot); out.append(txt);
+    inp.addEventListener('input', () => { onChange(+inp.value); txt.textContent = fmtVal(c, +inp.value); if (dot) dot.style.background = swatchColor(c.swatch); });
+    row.append(inp, out); if (dot) dot.style.background = swatchColor(c.swatch);
+  } else if (c.type === 'font') {
+    const sel = el('select'); const cats = ['sans', 'serif', 'mono', 'display'];
+    for (const cat of cats) { const fs = FONTS.filter((f) => f.cat === cat && (!c.cat || c.cat === cat)); if (!fs.length) continue; const og = el('optgroup', { label: cat }); for (const f of fs) og.append(el('option', { value: f.label, text: f.label, selected: f.label === val ? '' : null })); sel.append(og); }
+    if (![...sel.options].some((o) => o.value === val)) sel.append(el('option', { value: val, text: val, selected: '' }));
+    sel.addEventListener('change', () => onChange(sel.value)); row.append(sel);
+  } else if (c.type === 'select') {
+    const sel = el('select'); for (const o of (c.options || [])) { const ov = typeof o === 'string' ? o : o.value; const ol = typeof o === 'string' ? o : o.label; sel.append(el('option', { value: ov, text: ol, selected: ov === val ? '' : null })); }
+    sel.addEventListener('change', () => onChange(sel.value)); row.append(sel);
+  } else if (c.type === 'segment') {
+    const seg = el('div', { class: 'pt-seg' }); for (const o of (c.options || [])) seg.append(el('button', { text: o, 'aria-pressed': String(o === val), onclick: () => onChange(o) })); row.append(seg);
+  } else if (c.type === 'toggle') {
+    row.append(el('button', { class: 'pt-switch', 'aria-pressed': String(!!val), title: c.label, onclick: (e) => onChange(e.currentTarget.getAttribute('aria-pressed') !== 'true') }));
+  } else if (c.type === 'color') {
+    const inp = el('input', { type: 'color', value: val || '#888888' }); inp.addEventListener('input', () => onChange(inp.value)); row.append(inp);
+  } else if (c.type === 'text') {
+    const inp = el('input', { type: 'text', value: val || '', class: 'pt-input-text', style: 'grid-column:2/span 2;background:#0f1217;border:1px solid #2b313c;border-radius:6px;padding:3px 6px;user-select:text' }); inp.addEventListener('change', () => onChange(inp.value)); row.append(inp);
+  }
+  return row;
+}
+function swatchColor(kind) {
+  const vars = derive(currentTokens());
+  return kind === 'accent' ? vars['--pt-accent'] : kind === 'accent2' ? vars['--pt-accent-2'] : kind === 'bg' ? vars['--pt-bg'] : kind === 'tuiAccent' ? vars['--pt-tui-accent'] : '#888';
+}
+function renderAnnotateBox() {
+  ui.annotateBox.innerHTML = ''; if (!state.annotate) return;
+  ui.annotateBox.append(el('div', { class: 'pt-annotate-hint', text: 'Annotate mode: click any element in the prototype to pin a comment. Esc to exit.' }));
+}
+function renderPins() {
+  ui.pinsWrap.innerHTML = ''; if (!state.pins.length) { layoutPins(); return; }
+  const list = el('div', { class: 'pt-list' });
+  state.pins.forEach((p, i) => {
+    const vn = (manifest.variants.find((v) => v.id === p.v) || {}).name || p.v;
+    list.append(el('div', { class: 'pt-item', title: p.sel }, [
+      el('span', { class: 'pt-num', text: String(i + 1) }),
+      el('div', { class: 'pt-item-main', onclick: () => { if (p.v !== state.v) { state.v = p.v; save(); mount(); renderAll(); } if (p.screen) setScreen(p.screen); } }, [el('span', { text: p.note }), el('span', { class: 'pt-item-sub', text: ' · ' + vn + (p.screen ? '/' + p.screen : '') })]),
+      el('button', { class: 'pt-x', title: 'Remove pin', text: '×', onclick: () => { state.pins.splice(i, 1); save(); renderPins(); } })
+    ]));
+  });
+  ui.pinsWrap.append(el('div', { class: 'pt-h' }, [el('span', { text: 'Pins' }), el('span', { class: 'pt-mini', text: state.pins.length + ' · included in export' })]), list);
+  layoutPins();
+}
+function renderNotes() {
+  ui.notesWrap.innerHTML = '';
+  const ta = el('textarea', { class: 'pt-notes', placeholder: 'Notes for the agent, e.g. "use the header from B with the sidebar from C" (included in export)' });
+  ta.value = state.notes || ''; ta.addEventListener('input', () => { state.notes = ta.value; save(); });
+  ta.addEventListener('keydown', (e) => e.stopPropagation());
+  ui.notesWrap.append(el('div', { class: 'pt-h' }, [el('span', { text: 'Notes' })]), ta);
+}
+function renderSnaps() {
+  ui.snapsWrap.innerHTML = ''; if (!state.snaps.length) return;
+  const list = el('div', { class: 'pt-list' });
+  state.snaps.forEach((s, i) => {
+    const vn = (manifest.variants.find((v) => v.id === s.v) || {}).name || s.v;
+    list.append(el('div', { class: 'pt-item' }, [
+      el('div', { class: 'pt-item-main', title: 'Restore this snapshot', onclick: () => restoreSnapshot(s) }, [el('span', { text: s.name }), el('span', { class: 'pt-item-sub', text: ' · ' + vn + (s.preset ? ' · ' + s.preset : '') })]),
+      el('button', { class: 'pt-x', title: 'Delete snapshot', text: '×', onclick: () => { state.snaps.splice(i, 1); save(); renderSnaps(); } })
+    ]));
+  });
+  ui.snapsWrap.append(el('div', { class: 'pt-h' }, [el('span', { text: 'Snapshots' }), el('span', { class: 'pt-mini', text: 'click to restore · included in export' })]), list);
+}
+let toastTimer = null;
+function toast(msg, ms = 1800) {
+  let t = $('.pt-toast'); if (!t) { t = el('div', { class: 'pt-toast' }); document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), ms);
+}
+function setStatus(msg, cls) { ui.statusL.textContent = msg || ''; ui.statusL.className = cls || ''; }
+function showModal(text) {
+  const ta = el('textarea', { spellcheck: 'false' }); ta.value = text;
+  const box = el('div', { class: 'pt-modal-box' }, [
+    el('div', { style: 'display:flex;justify-content:space-between;align-items:center' }, [el('b', { text: 'Handoff for your AI agent' }), el('span', { style: 'color:#8d96a5', text: 'Select all, copy, paste into the chat' })]),
+    ta,
+    el('div', { class: 'pt-actions' }, [
+      el('button', { class: 'pt-btn pt-primary', text: 'Copy', onclick: () => copyText(ta.value).then((ok) => toast(ok ? 'Copied to clipboard' : 'Select the text and press Ctrl/Cmd+C')) }),
+      el('button', { class: 'pt-btn', text: 'Close', onclick: () => modal.remove() })
+    ])
+  ]);
+  const modal = el('div', { class: 'pt-modal', onclick: (e) => { if (e.target === modal) modal.remove(); } }, [box]);
+  document.body.appendChild(modal); ta.focus(); ta.select();
+}
+
+/* -------------------------------------------------------------- actions */
+function targets() { return state.sync ? manifest.variants.map((v) => v.id) : [state.v]; }
+function setToken(id, value, opts) {
+  const c = ctrlById(id); if (!c) return;
+  for (const vid of targets()) state.tokens[vid][id] = value;
+  save(); applyTokens();
+  if (!(opts && opts.silent)) { syncRow(id); renderPresets(); if (id === 'mode') renderToolbar(); }
+}
+function setMacro(id, v) {
+  state.macros[id] = v; const mapped = MACROS[id] ? MACROS[id](v) : {};
+  for (const vid of targets()) for (const k of Object.keys(mapped)) if (ctrlById(k)) state.tokens[vid][k] = mapped[k];
+  save(); applyTokens(); for (const k of Object.keys(mapped)) syncRow(k); renderPresets();
+}
+function syncRow(id) {
+  const row = ui.groups.querySelector('.pt-row[data-id="' + CSS.escape(id) + '"]'); if (!row) return; const c = ctrlById(id); const v = c.macro ? state.macros[id] : currentTokens()[id];
+  const inp = row.querySelector('input[type=range]'); if (inp) { inp.value = v; const txt = row.querySelector('.pt-val span:last-child'); if (txt) txt.textContent = fmtVal(c, v); }
+  const sel = row.querySelector('select'); if (sel) sel.value = v;
+  const seg = row.querySelector('.pt-seg'); if (seg) seg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.textContent === String(v))));
+  const sw = row.querySelector('.pt-switch'); if (sw) sw.setAttribute('aria-pressed', String(!!v));
+  const col = row.querySelector('input[type=color]'); if (col) col.value = v;
+  const txtIn = row.querySelector('input[type=text]'); if (txtIn) txtIn.value = v;
+  ui.groups.querySelectorAll('.pt-dot').forEach((d) => { const r = d.closest('.pt-row'); const cc = ctrlById(r.getAttribute('data-id')); if (cc && cc.swatch) d.style.background = swatchColor(cc.swatch); });
+}
+function refreshRows() { for (const c of CONTROLS) syncRow(c.id); }
+function resetControl(c) { if (c.macro) setMacro(c.id, c.default); else setToken(c.id, variantDefaults(state.v)[c.id]); toast(c.label + ' reset'); }
+function applyPreset(name) {
+  const p = PRESETS[name]; if (!p) return;
+  for (const vid of targets()) { state.tokens[vid] = Object.assign({}, variantDefaults(vid), p); state.preset[vid] = name; }
+  save(); applyTokens(); refreshRows(); renderPresets(); renderToolbar(); toast('Preset: ' + name);
+}
+function resetTokens() {
+  for (const vid of targets()) { state.tokens[vid] = variantDefaults(vid); state.preset[vid] = null; }
+  state.macros = { warmth: 0, energy: 0.5 }; save(); applyTokens(); refreshRows(); renderPresets(); renderToolbar(); toast('Dials reset to variant defaults');
+}
+function stepVariant(d) {
+  const n = manifest.variants.length; if (n < 2) return; const i = manifest.variants.findIndex((v) => v.id === state.v);
+  state.v = manifest.variants[(i + d + n) % n].id; save(); mount(); renderNav(); renderPresets(); refreshRows(); renderToolbar(); renderPins();
+}
+function setCollapsed(c, silent) { state.deck.collapsed = !!c; deck.setAttribute('data-collapsed', String(!!c)); ui.btnCollapse.textContent = c ? '+' : '–'; ui.btnCollapse.title = c ? 'Expand (`)' : 'Collapse (`)'; if (!silent) save(); placeDeck(); }
+function addSnapshot() {
+  const v = currentVariant(); const name = 'Snap ' + (state.snaps.length + 1);
+  state.snaps.push({ id: uid(), name, v: v.id, screen: currentScreen(), viewport: state.viewport, preset: state.preset[v.id], tokens: clone(currentTokens()), macros: clone(state.macros), at: new Date().toISOString() });
+  save(); renderSnaps(); toast(name + ' saved (' + (v.name || v.id) + ')');
+}
+function restoreSnapshot(s) {
+  if (!manifest.variants.some((v) => v.id === s.v)) return;
+  state.v = s.v; state.tokens[s.v] = Object.assign({}, variantDefaults(s.v), s.tokens || {}); state.preset[s.v] = s.preset || null; state.macros = Object.assign({ warmth: 0, energy: 0.5 }, s.macros || {});
+  if (s.screen) state.screen[s.v] = s.screen; if (s.viewport) state.viewport = s.viewport;
+  save(); mount(); renderAll(); refreshRows(); toast('Restored ' + s.name);
+}
+
+/* ---------------------------------------------------------------- drag */
+let drag = null;
+function placeDeck() {
+  const r = deck.getBoundingClientRect(); const W = window.innerWidth, H = window.innerHeight;
+  let x = state.deck.x, y = state.deck.y;
+  if (x == null || y == null) { x = W - r.width - 16; y = 16; }
+  x = clamp(x, 0, Math.max(0, W - r.width)); y = clamp(y, 0, Math.max(0, H - Math.min(r.height, H)));
+  deck.style.left = x + 'px'; deck.style.top = y + 'px';
+}
+function startDrag(e) {
+  if (e.target.closest('button')) return; if (e.button !== 0) return;
+  const r = deck.getBoundingClientRect(); drag = { dx: e.clientX - r.left, dy: e.clientY - r.top, moved: false };
+  e.currentTarget.setPointerCapture && e.currentTarget.setPointerCapture(e.pointerId);
+  document.body.classList.add('pt-dragging');
+  const move = (ev) => { if (!drag) return; drag.moved = true; state.deck.x = ev.clientX - drag.dx; state.deck.y = ev.clientY - drag.dy; placeDeck(); };
+  const up = () => { document.body.classList.remove('pt-dragging'); if (drag && drag.moved) { const r2 = deck.getBoundingClientRect(); state.deck.x = r2.left; state.deck.y = r2.top; save(); } drag = null; window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up); };
+  window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
+  e.preventDefault();
+}
+window.addEventListener('resize', () => { placeDeck(); scheduleLayoutPins(); });
+
+/* ---------------------------------------------------------- annotations */
+let composer = null, hoverEl = null;
+function toggleAnnotate(force) {
+  state.annotate = force == null ? !state.annotate : !!force; ui.btnAnnotate.setAttribute('aria-pressed', String(state.annotate));
+  document.body.classList.toggle('pt-annotating', state.annotate); renderAnnotateBox();
+  if (frameDoc) { frameDoc.documentElement.style.cursor = state.annotate ? 'crosshair' : ''; }
+  if (!state.annotate) { clearHover(); if (composer) { composer.remove(); composer = null; deck.classList.remove('pt-composing'); } }
+  if (state.annotate && state.deck.collapsed) setCollapsed(false);
+}
+function onFrameHover(e) { if (!state.annotate || composer) return; clearHover(); hoverEl = e.target; if (hoverEl && hoverEl.style) { hoverEl.__ptOutline = hoverEl.style.outline; hoverEl.style.outline = '2px dashed #ff4d6d'; hoverEl.style.outlineOffset = '2px'; } }
+function onFrameHoverOut() { clearHover(); }
+function clearHover() { if (hoverEl && hoverEl.style) { hoverEl.style.outline = hoverEl.__ptOutline || ''; hoverEl.style.outlineOffset = ''; } hoverEl = null; }
+function selectorFor(node) {
+  const parts = []; let n = node, depth = 0;
+  while (n && n.nodeType === 1 && n.tagName !== 'HTML' && depth < 5) {
+    let part = n.tagName.toLowerCase();
+    if (n.id) { parts.unshift(part + '#' + n.id); break; }
+    const cls = [...n.classList].filter((c) => !/^pt-/.test(c)).slice(0, 2); if (cls.length) part += '.' + cls.join('.');
+    const sib = n.parentElement ? [...n.parentElement.children].filter((x) => x.tagName === n.tagName) : []; if (sib.length > 1) part += ':nth-of-type(' + (sib.indexOf(n) + 1) + ')';
+    parts.unshift(part); n = n.parentElement; depth++;
+  }
+  return parts.join(' > ');
+}
+function onFrameClick(e) {
+  if (!state.annotate || composer) return; e.preventDefault(); e.stopPropagation();
+  const target = e.target; clearHover();
+  const sel = selectorFor(target); const snippet = (target.innerText || target.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 60);
+  const input = el('input', { type: 'text', placeholder: 'Your comment about this element…' });
+  input.addEventListener('keydown', (ev) => { ev.stopPropagation(); if (ev.key === 'Enter') commit(); if (ev.key === 'Escape') cancel(); });
+  const commit = () => { const note = input.value.trim(); if (!note) return cancel(); state.pins.push({ id: uid(), v: state.v, screen: currentScreen(), sel, snippet, note }); save(); cancel(); renderPins(); toast('Pin added'); };
+  const cancel = () => { if (composer) composer.remove(); composer = null; deck.classList.remove('pt-composing'); renderAnnotateBox(); };
+  composer = el('div', { class: 'pt-composer' }, [
+    el('div', { class: 'pt-composer-target', text: sel + (snippet ? '  "' + snippet + '"' : '') }), input,
+    el('div', { class: 'pt-actions' }, [el('button', { class: 'pt-btn pt-primary pt-small', text: 'Add pin', onclick: commit }), el('button', { class: 'pt-btn pt-small', text: 'Cancel', onclick: cancel })])
+  ]);
+  ui.annotateBox.innerHTML = ''; ui.annotateBox.append(composer); deck.classList.add('pt-composing'); input.focus();
+}
+let pinRaf = null;
+function scheduleLayoutPins() { if (pinRaf) return; pinRaf = requestAnimationFrame(() => { pinRaf = null; layoutPins(); }); }
+function layoutPins() {
+  pinsLayer.innerHTML = ''; if (!frame || !frameDoc) return; const fr = frame.getBoundingClientRect(); const sc = currentScreen();
+  state.pins.forEach((p, i) => {
+    if (p.v !== state.v || (p.screen && sc && p.screen !== sc)) return;
+    let node = null; try { node = frameDoc.querySelector(p.sel); } catch (e) { node = null; }
+    if (!node) return; const r = node.getBoundingClientRect(); if (!r.width && !r.height) return;
+    const x = fr.left + clamp(r.left + r.width / 2, 0, fr.width), y = fr.top + clamp(r.top + 8, 0, fr.height);
+    if (r.bottom < 0 || r.top > fr.height) return;
+    pinsLayer.append(el('div', { class: 'pt-pin', text: String(i + 1), title: p.note + '\n' + p.sel, style: 'left:' + x + 'px;top:' + y + 'px', onclick: () => toast('#' + (i + 1) + ': ' + p.note, 2600) }));
+  });
+}
+
+/* --------------------------------------------------------------- export */
+function buildHandoff() {
+  const v = currentVariant(); const i = manifest.variants.indexOf(v); const t = currentTokens(); const d = variantDefaults(v.id); const vars = derive(t);
+  const changes = CONTROLS.filter((c) => !c.macro && String(t[c.id]) !== String(d[c.id])).map((c) => ({ id: c.id, label: c.label, from: fmtVal(c, d[c.id]), to: fmtVal(c, t[c.id]) }));
+  const presetName = state.preset[v.id] || null;
+  const file = (() => { try { return decodeURIComponent(location.pathname.split('/').pop() || '') || null; } catch (e) { return null; } })();
+  const custom = {}; for (const c of CONTROLS) if (c.custom) custom[c.id] = t[c.id];
+  const css = ':root {\n' + Object.keys(vars).map((k) => '  ' + k + ': ' + vars[k] + ';').join('\n') + '\n}';
+  return {
+    schema: HANDOFF_SCHEMA, deckVersion: DECK_VERSION, exportedAt: new Date().toISOString(),
+    instructions: 'The user reviewed this prototype and chose the variant in "decision". Rebuild or implement using that variant\'s structure, the "tokens" (or the resolved "css" variables), and honor "notes" and "pins". "changes" lists what the user moved away from the variant defaults.',
+    prototype: { id: manifest.id, name: manifest.name, file, kind: KIND, brief: manifest.brief || null },
+    decision: { variantId: v.id, variantName: v.name || v.id, thesis: v.thesis || null, index: i + 1, of: manifest.variants.length, screen: currentScreen() },
+    preset: { name: presetName, modified: presetName ? presetModified() : null },
+    mode: KIND === 'tui' ? null : (t.mode || 'light'), viewport: state.viewport, macros: clone(state.macros),
+    tokens: clone(t), defaults: d, changes, custom, css,
+    notes: state.notes || '',
+    pins: state.pins.map((p, n) => ({ n: n + 1, variantId: p.v, screen: p.screen || null, selector: p.sel, text: p.snippet || '', note: p.note })),
+    snapshots: state.snaps.map((s) => ({ name: s.name, variantId: s.v, screen: s.screen || null, preset: s.preset || null, viewport: s.viewport, tokens: s.tokens, at: s.at })),
+    variants: manifest.variants.map((x) => ({ id: x.id, name: x.name || x.id, thesis: x.thesis || null }))
+  };
+}
+function buildHandoffText() {
+  const h = buildHandoff(); const L = [];
+  L.push('AI-ASSIST PROTOTYPE HANDOFF v1');
+  L.push('Prototype: ' + h.prototype.name + (h.prototype.file ? ' (' + h.prototype.file + ')' : '') + ' · ' + (h.prototype.kind === 'tui' ? 'TUI' : 'web'));
+  L.push('Decision: variant ' + h.decision.variantId + ' "' + h.decision.variantName + '" (' + h.decision.index + ' of ' + h.decision.of + ')' + (h.decision.screen ? ' · screen: ' + h.decision.screen : '') + (h.decision.thesis ? '\n  thesis: ' + h.decision.thesis : ''));
+  L.push('Look: preset ' + (h.preset.name ? h.preset.name + (h.preset.modified ? ' (modified)' : '') : 'custom') + (h.mode ? ' · mode ' + h.mode : '') + ' · viewport ' + h.viewport);
+  L.push(h.changes.length ? 'Changed from variant defaults (' + h.changes.length + '): ' + h.changes.map((c) => c.label + ' ' + c.from + '→' + c.to).join(', ') : 'Dials: all at variant defaults');
+  if (Object.keys(h.custom).length) L.push('Custom controls: ' + Object.keys(h.custom).map((k) => k + '=' + h.custom[k]).join(', '));
+  if (h.notes) L.push('Notes: ' + h.notes.replace(/\n/g, '\n  '));
+  if (h.pins.length) { L.push('Pins (' + h.pins.length + '):'); for (const p of h.pins) L.push('  ' + p.n + '. [' + p.variantId + (p.screen ? '/' + p.screen : '') + '] ' + p.selector + (p.text ? ' "' + p.text + '"' : '') + ': ' + p.note); }
+  if (h.snapshots.length) L.push('Snapshots (' + h.snapshots.length + '): ' + h.snapshots.map((s) => s.name + ' [' + s.variantId + (s.preset ? ' · ' + s.preset : '') + ']').join(', '));
+  L.push(''); L.push('```json'); L.push(JSON.stringify(h, null, 2)); L.push('```');
+  return L.join('\n');
+}
+async function copyText(text) {
+  try { if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); return true; } } catch (e) { /* fall through */ }
+  try { const ta = el('textarea', { style: 'position:fixed;left:-9999px;top:0' }); ta.value = text; document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove(); if (ok) return true; } catch (e) { /* fall through */ }
+  return false;
+}
+async function exportHandoff(fmt) {
+  const text = fmt === 'json' ? JSON.stringify(buildHandoff(), null, 2) : buildHandoffText();
+  const ok = await copyText(text);
+  if (ok) { toast(fmt === 'json' ? 'Handoff JSON copied' : 'Handoff copied · paste it into your AI agent', 2600); setStatus('Copied ✓ ' + new Date().toLocaleTimeString(), 'ok'); }
+  else { setStatus('Clipboard blocked · copy from the window', 'err'); showModal(text); }
+}
+
+/* ------------------------------------------------------------ keyboard */
+function onKey(e) {
+  const t = e.target; const tag = t && t.tagName; const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (t && t.isContentEditable);
+  if (e.key === 'Escape') { if (composer) { composer.remove(); composer = null; deck.classList.remove('pt-composing'); renderAnnotateBox(); return; } if (state.annotate) { toggleAnnotate(false); return; } const m = $('.pt-modal'); if (m) m.remove(); return; }
+  if (typing) return;
+  if (e.key === 'ArrowLeft') { stepVariant(-1); e.preventDefault(); }
+  else if (e.key === 'ArrowRight') { stepVariant(1); e.preventDefault(); }
+  else if (e.key === '`') { setCollapsed(!state.deck.collapsed); e.preventDefault(); }
+  else if (e.key === '[' || e.key === ']') { const sc = screensOf(currentVariant()); if (sc.length > 1) { const i = sc.findIndex((s) => s.id === currentScreen()); setScreen(sc[(i + (e.key === ']' ? 1 : -1) + sc.length) % sc.length].id); e.preventDefault(); } }
+  else if (e.shiftKey && (e.key === 'E' || e.key === 'e')) { exportHandoff('text'); e.preventDefault(); }
+  else if (e.shiftKey && (e.key === 'S' || e.key === 's')) { addSnapshot(); e.preventDefault(); }
+  else if (e.shiftKey && (e.key === 'A' || e.key === 'a')) { toggleAnnotate(); e.preventDefault(); }
+}
+document.addEventListener('keydown', onKey);
+
+/* ---------------------------------------------------------------- init */
+const missing = manifest.variants.filter((v) => !document.querySelector('template[data-variant="' + CSS.escape(v.id) + '"]')).map((v) => v.id);
+buildDeck(); mount(); placeDeck();
+if (missing.length) setStatus('⚠ missing template for: ' + missing.join(', '), 'err');
+else setStatus(manifest.variants.length + ' variant' + (manifest.variants.length === 1 ? '' : 's') + ' · ' + CONTROLS.length + ' dials', '');
+window.__PT__ = { version: DECK_VERSION, manifest, get state() { return state; }, handoff: buildHandoff, handoffText: buildHandoffText, setToken, setMacro, applyPreset, go: setScreen, variant(id) { if (manifest.variants.some((v) => v.id === id)) { state.v = id; save(); mount(); renderAll(); refreshRows(); } return mountReady; }, ready: () => mountReady, frame: () => frame, controls: CONTROLS, presets: PRESETS };
+console.info('%cai-assist-prototype%c deck v' + DECK_VERSION + ' · ' + manifest.variants.length + ' variant(s) · window.__PT__ for scripting', 'font-weight:bold', '');
+})();
+</script>
+</body>
+</html>

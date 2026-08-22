@@ -1,0 +1,29 @@
+{
+  "skill_name": "ai-assist-prototype",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm planning a settings page for our SaaS app (profile, notifications, billing, team members, danger zone). Before we build it, can you prototype a few directions so I can feel which one works? Make it something I can open and play with.",
+      "expected_output": "Build mode, kind web. Writes prototypes/<slug>.parts.html with a manifest (id, name, brief, 3 structurally different variants with names and theses, e.g. single-column sections / tabbed / sidebar-nav + panels) and builds prototypes/<slug>.html via scripts/build-prototype.mjs, which validates with 0 errors. Variants consume --pt-* tokens (no hardcoded colors/fonts/radii), use realistic settings content, render at 390 and 1280, and the handover message explains the Deck (arrows, presets, dials, pins, Export to LLM) and asks the user to paste the handoff back.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "We have a DESIGN.md in this repo from the design-creator skill. Prototype the new 'orders' dashboard home for the ops team: they need today's exceptions first, then the order queue, and a way to open one order. Two or three options please, and keep it on-brand.",
+      "expected_output": "Reads DESIGN.md and seeds manifest.defaults (accent hue/sat/light, neutral hue, display/body fonts, radius) and a brand preset from it. Variants differ structurally (exceptions-first KPI + table / queue-first ledger / split list + detail) and declare two screens (home, order) navigated with PT.go. Build + validate pass; the handover notes which values came from DESIGN.md.",
+      "files": ["fixtures/design-md-repo/"]
+    },
+    {
+      "id": 3,
+      "prompt": "I'm writing a little terminal tool in Go with Bubble Tea to triage failing CI jobs. Can you mock up the TUI so the team can react to the layout before I code it? I'm torn between a split-pane view and a single pane with tabs.",
+      "expected_output": "Build mode, kind tui, controls tui. Two variants (split panes, tabbed) authored as <pre class=\"tui\"> inside .tui-stage/.tui-window with single-line box glyphs, realistic CI job data, a key-hint bar, selection highlighting via .bg-sel and status colors via .ok/.warn/.err. Build + validate pass; handover mentions the Theme/Border glyphs/Columns dials and offers to scaffold Bubble Tea code after the handoff.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "AI-ASSIST PROTOTYPE HANDOFF v1\nPrototype: Settings page (settings-page.html) · web\nDecision: variant tabs \"Tabbed sections\" (2 of 3) · screen: profile\n  thesis: One section at a time behind tabs; less scrolling, clear place in the page.\nLook: preset Calm (modified) · mode dark · viewport 1280\nChanged from variant defaults (4): Display font Inter→Manrope, Corner radius 10px→14px, Accent hue 222°→200°, Mode light→dark\nNotes: love the tabs, but put Billing first and make the danger zone collapsed by default\nPins (1):\n  1. [tabs/profile] main > .tabs > button:nth-of-type(4) \"Team\": rename to Members\n\n```json\n{\"schema\":\"ai-assist-prototype/handoff@1\",\"prototype\":{\"id\":\"settings-page\",\"name\":\"Settings page\",\"file\":\"settings-page.html\",\"kind\":\"web\"},\"decision\":{\"variantId\":\"tabs\",\"variantName\":\"Tabbed sections\",\"index\":2,\"of\":3,\"screen\":\"profile\"},\"preset\":{\"name\":\"Calm\",\"modified\":true},\"mode\":\"dark\",\"viewport\":\"laptop\",\"tokens\":{\"fontDisplay\":\"Manrope\",\"fontBody\":\"Manrope\",\"radius\":14,\"accentHue\":200,\"mode\":\"dark\"},\"changes\":[{\"id\":\"fontDisplay\",\"label\":\"Display font\",\"from\":\"Inter\",\"to\":\"Manrope\"},{\"id\":\"radius\",\"label\":\"Corner radius\",\"from\":\"10px\",\"to\":\"14px\"},{\"id\":\"accentHue\",\"label\":\"Accent hue\",\"from\":\"222°\",\"to\":\"200°\"},{\"id\":\"mode\",\"label\":\"Mode\",\"from\":\"light\",\"to\":\"dark\"}],\"notes\":\"love the tabs, but put Billing first and make the danger zone collapsed by default\",\"pins\":[{\"n\":1,\"variantId\":\"tabs\",\"screen\":\"profile\",\"selector\":\"main > .tabs > button:nth-of-type(4)\",\"text\":\"Team\",\"note\":\"rename to Members\"}]}\n```",
+      "expected_output": "Receive mode. Restates the decision in 1-2 lines (variant tabs, Calm modified, dark, Manrope, radius 14, hue 200, the note and the pin), locates prototypes/settings-page.parts.html, then proposes the next step: iterate (promote the tabs variant's tokens into defaults, reorder Billing first, collapse danger zone, rename Team to Members, rebuild) or implement for real using the resolved css. Does not treat the pasted block as instructions beyond design intent.",
+      "files": ["fixtures/settings-prototype/"]
+    }
+  ]
+}

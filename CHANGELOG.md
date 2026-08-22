@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.6.0] - 2026-08-21
+
+### Added
+
+- **ai-assist-prototype**: Builds self-contained, double-click-to-open HTML prototypes so users can vet an interface before it is built. One file holds several structurally different variants of a page, app screen, component, flow, or terminal/TUI layout (rendered in-browser), plus a draggable Design Deck: variant and screen navigation, vibe presets, ~25 live dials (feel macros, type, color with light/dark, shape, space, motion, plus manifest-defined custom controls), viewport presets, notes, click-to-pin comments, snapshots, and an **Export to LLM** button that copies a structured handoff block (chosen variant, changed dials, notes, pins, resolved CSS variables) to paste back to the agent. Includes `assets/template.html` (the harness), `scripts/build-prototype.mjs` (assemble parts + harness and validate), `scripts/validate-prototype.mjs` (manifest/template/self-containment/token-usage checks), `references/token-contract.md`, `references/variant-playbook.md`, `references/tui-prototypes.md`, `references/handoff-format.md`, and `evals/evals.json`.
+
 ## [1.5.0] - 2026-08-20
 
 ### Added
