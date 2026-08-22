@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.6.1] - 2026-08-22
+
+### Added
+
+- **ai-assist-prototype**: The Design Deck now right-sizes itself to the prototype. A new manifest key `dials` picks a tier (`none` for structure-only checks, `essential` for a component, `standard` for a page or screen, `full` for design explorations, or an explicit list of control ids); `extraControls` always show, `hidePresets` removes built-in preset chips, and small decks open every group while larger ones open Feel/Type and any custom group. Long flows (more than five screens) get a screen dropdown instead of a crowded tab strip. SKILL.md gains a "Right-size the Deck" step, the validator reports the tier and warns when `dials` is missing or when everything is hidden by hand, and the handoff carries `prototype.dials`, `exposedDials` and `lockedDials`. Two new evals cover a tiny component (few or no dials) and a full design exploration.
+
+### Fixed
+
+- **ai-assist-prototype**: `hideControls` now locks a dial instead of breaking it. Hidden dials used to lose their default value (a locked `tracking` or `fontSize` produced `undefined`/`NaN` CSS) and presets and macros could still move them; they now sit at `defaults`/`variant.tokens`, presets and the Feel macros leave them alone, their fonts still load, and a macro set through `__PT__.setMacro` refreshes its own row. Harness bumped to deck v1.1.0.
+
 ## [1.6.0] - 2026-08-21
 
 ### Added

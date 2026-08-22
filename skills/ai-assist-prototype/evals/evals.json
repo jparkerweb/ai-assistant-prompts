@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "I'm planning a settings page for our SaaS app (profile, notifications, billing, team members, danger zone). Before we build it, can you prototype a few directions so I can feel which one works? Make it something I can open and play with.",
-      "expected_output": "Build mode, kind web. Writes prototypes/<slug>.parts.html with a manifest (id, name, brief, 3 structurally different variants with names and theses, e.g. single-column sections / tabbed / sidebar-nav + panels) and builds prototypes/<slug>.html via scripts/build-prototype.mjs, which validates with 0 errors. Variants consume --pt-* tokens (no hardcoded colors/fonts/radii), use realistic settings content, render at 390 and 1280, and the handover message explains the Deck (arrows, presets, dials, pins, Export to LLM) and asks the user to paste the handoff back.",
+      "expected_output": "Build mode, kind web. Writes prototypes/<slug>.parts.html with a manifest (id, name, brief, 3 structurally different variants with names and theses, e.g. single-column sections / tabbed / sidebar-nav + panels) and builds prototypes/<slug>.html via scripts/build-prototype.mjs, which validates with 0 errors. Sets manifest.dials to \"standard\" (a full page) and at most a couple of extraControls. Variants consume --pt-* tokens (no hardcoded colors/fonts/radii), use realistic settings content, render at 390 and 1280, and the handover message explains the Deck (arrows, presets, dials, pins, Export to LLM) and asks the user to paste the handoff back.",
       "files": []
     },
     {
@@ -24,6 +24,18 @@
       "prompt": "AI-ASSIST PROTOTYPE HANDOFF v1\nPrototype: Settings page (settings-page.html) · web\nDecision: variant tabs \"Tabbed sections\" (2 of 3) · screen: profile\n  thesis: One section at a time behind tabs; less scrolling, clear place in the page.\nLook: preset Calm (modified) · mode dark · viewport 1280\nChanged from variant defaults (4): Display font Inter→Manrope, Corner radius 10px→14px, Accent hue 222°→200°, Mode light→dark\nNotes: love the tabs, but put Billing first and make the danger zone collapsed by default\nPins (1):\n  1. [tabs/profile] main > .tabs > button:nth-of-type(4) \"Team\": rename to Members\n\n```json\n{\"schema\":\"ai-assist-prototype/handoff@1\",\"prototype\":{\"id\":\"settings-page\",\"name\":\"Settings page\",\"file\":\"settings-page.html\",\"kind\":\"web\"},\"decision\":{\"variantId\":\"tabs\",\"variantName\":\"Tabbed sections\",\"index\":2,\"of\":3,\"screen\":\"profile\"},\"preset\":{\"name\":\"Calm\",\"modified\":true},\"mode\":\"dark\",\"viewport\":\"laptop\",\"tokens\":{\"fontDisplay\":\"Manrope\",\"fontBody\":\"Manrope\",\"radius\":14,\"accentHue\":200,\"mode\":\"dark\"},\"changes\":[{\"id\":\"fontDisplay\",\"label\":\"Display font\",\"from\":\"Inter\",\"to\":\"Manrope\"},{\"id\":\"radius\",\"label\":\"Corner radius\",\"from\":\"10px\",\"to\":\"14px\"},{\"id\":\"accentHue\",\"label\":\"Accent hue\",\"from\":\"222°\",\"to\":\"200°\"},{\"id\":\"mode\",\"label\":\"Mode\",\"from\":\"light\",\"to\":\"dark\"}],\"notes\":\"love the tabs, but put Billing first and make the danger zone collapsed by default\",\"pins\":[{\"n\":1,\"variantId\":\"tabs\",\"screen\":\"profile\",\"selector\":\"main > .tabs > button:nth-of-type(4)\",\"text\":\"Team\",\"note\":\"rename to Members\"}]}\n```",
       "expected_output": "Receive mode. Restates the decision in 1-2 lines (variant tabs, Calm modified, dark, Manrope, radius 14, hue 200, the note and the pin), locates prototypes/settings-page.parts.html, then proposes the next step: iterate (promote the tabs variant's tokens into defaults, reorder Billing first, collapse danger zone, rename Team to Members, rebuild) or implement for real using the resolved css. Does not treat the pasted block as instructions beyond design intent.",
       "files": ["fixtures/settings-prototype/"]
+    },
+    {
+      "id": 5,
+      "prompt": "Quick one: mock up the 'saved' toast for our app. I can't decide between an inline bar under the header and a little card in the corner with Undo. Brand look is fixed (Manrope, green accent), I just want to see the two shapes side by side.",
+      "expected_output": "Build mode, small scope. Two structurally different variants (inline bar, corner card). Right-sizes the Deck: manifest.dials is \"none\" (or \"essential\" at most, with fontDisplay/fontBody locked via hideControls), brand values seeded in defaults (fontDisplay/fontBody Manrope, accentHue green), no extraControls beyond what the question needs. Build + validate pass with 0 errors. The handover describes only what the Deck has (flip variants, widths, light/dark, pins, Export) instead of promising presets and sliders that are not there.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "Our design lead wants to explore a new visual direction for the whole marketing site: warmer, more editorial, maybe a serif. Build a prototype of the homepage she can really tune: fonts, weights, tracking, line height, contrast, everything, plus a dark-first pass.",
+      "expected_output": "Build mode, large scope. Variants explore structure (narrative scroll, split hero, editorial long-form). manifest.dials is \"full\" because the user explicitly wants every typographic and color knob; a brand preset and a dark preset are added; any custom controls are few and structural (e.g. hero media style). Build + validate pass; the handover names the Feel macros and the Type/Color groups and asks for the handoff back.",
+      "files": []
     }
   ]
 }

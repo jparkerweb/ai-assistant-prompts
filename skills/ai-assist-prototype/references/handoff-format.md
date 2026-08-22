@@ -32,14 +32,14 @@ Snapshots (<n>): <name> [<variantId> · <preset>], …
 ```
 ```
 
-Lines that have nothing to say are omitted: no `screen:` when the variant has no screens, no `thesis:` line when none was declared, `Dials: all at variant defaults` replaces the `Changed from…` line when nothing moved, and `Custom controls`, `Notes`, `Pins`, `Snapshots` appear only when present. `mode` is absent for TUI prototypes.
+Lines that have nothing to say are omitted: no `screen:` when the variant has no screens, no `thesis:` line when none was declared, `Dials: all at variant defaults` replaces the `Changed from…` line when nothing moved (`Dials: none exposed (fixed look)` when the prototype was built with `dials: "none"`), and `Custom controls`, `Notes`, `Pins`, `Snapshots` appear only when present. `mode` is absent for TUI prototypes.
 
 ### JSON field reference (`ai-assist-prototype/handoff@1`)
 
 | Field | Type | Meaning |
 |---|---|---|
 | `schema` | string | `ai-assist-prototype/handoff@1`. Treat unknown minor additions as optional. |
-| `deckVersion` | string | harness version that produced the export (`1.0.0` today) |
+| `deckVersion` | string | harness version that produced the export (`1.1.0` today; `1.0.0` exports lack `prototype.dials` / `exposedDials` / `lockedDials`) |
 | `exportedAt` | ISO string | when the user pressed Export |
 | `instructions` | string | one sentence addressed to any LLM, for agents that do not have this skill |
 | `prototype.id` | string | manifest id, also the localStorage key for the user's deck state |
@@ -47,6 +47,9 @@ Lines that have nothing to say are omitted: no `screen:` when the variant has no
 | `prototype.file` | string or null | the HTML file name (bare name, not a path) taken from the URL |
 | `prototype.kind` | `web` or `tui` | which token system applies |
 | `prototype.brief` | string or null | the design question you wrote into the manifest |
+| `prototype.dials` | string or string[] | the `manifest.dials` tier (`none`, `essential`, `standard`, `full`) or explicit id list the Deck was built with |
+| `prototype.exposedDials` | string[] | ids of the dials the user could actually see and move (built-ins at the tier minus locked ones, plus `extraControls`; macros excluded) |
+| `prototype.lockedDials` | string[] | ids locked by `hideControls`; they sit at the variant defaults regardless of presets |
 | `decision.variantId` / `variantName` / `thesis` | strings | the variant that was showing when the user exported: this is the choice |
 | `decision.index` / `of` | numbers | position in the variant list, for humans |
 | `decision.screen` | string or null | the screen that was showing (`null` when the variant has none) |
@@ -57,7 +60,7 @@ Lines that have nothing to say are omitted: no `screen:` when the variant has no
 | `macros` | `{ warmth, energy }` | positions of the Feel macro dials; informational, the primitives they wrote are in `tokens` |
 | `tokens` | object | every dial's current primitive value for the chosen variant, keyed by control id (built-in and `extraControls`); numbers are unitless, fonts are library labels |
 | `defaults` | object | that variant's defaults (control defaults + `manifest.defaults` + `variant.tokens`) |
-| `changes` | array | `{ id, label, from, to }` for each dial that differs from `defaults`, values formatted with units (`10px`, `222°`, `78%`) |
+| `changes` | array | `{ id, label, from, to }` for each dial that differs from `defaults`, values formatted with units (`10px`, `222°`, `78%`). Includes dials the tier did not expose when a preset or a Feel macro moved them (e.g. `motion` after dragging Energy), so it is the truthful delta even on an `essential` Deck |
 | `custom` | object | values of `extraControls` only, for quick reading |
 | `css` | string | a complete `:root { --pt-…: …; }` block with every resolved variable (colors as `hsl(...)`, sizes in px, font stacks, shadows, durations), ready to paste into a stylesheet |
 | `notes` | string | the Notes textarea, verbatim |

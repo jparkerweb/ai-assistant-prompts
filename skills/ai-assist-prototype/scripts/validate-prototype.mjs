@@ -78,6 +78,10 @@ const knownControlIds = new Set();
 if (harnessScript) for (const m of harnessScript[1].matchAll(/\{\s*id:\s*'([A-Za-z0-9_]+)'\s*,\s*group:/g)) knownControlIds.add(m[1]);
 const webIds = new Set([...knownControlIds].filter((id) => !id.startsWith('tui')));
 const tuiIds = new Set([...knownControlIds].filter((id) => id.startsWith('tui')));
+// Dial tiers are declared in the harness as strict JSON (`const TIERS = {...};`) so they can be read here without drift.
+let TIERS = null;
+if (harnessScript) { const tm = harnessScript[1].match(/const TIERS = (\{[^;]*\});/); if (tm) { try { TIERS = JSON.parse(tm[1]); } catch (e) { TIERS = null; } } }
+const TIER_NAMES = ['none', 'essential', 'standard', 'full'];
 
 /* ------------------------------------------------------------ templates */
 const templates = new Map();
@@ -101,8 +105,27 @@ if (manifest) {
   const controls = manifest.controls || kind;
   if (!['web', 'tui'].includes(controls)) err(`manifest.controls must be "web" or "tui" (got "${controls}").`);
   if (controls !== kind) warn(`manifest.kind is "${kind}" but manifest.controls is "${controls}". Usually they match.`);
+  // activeIds = every control the harness knows for this set (hidden ones included: they are still valid keys in defaults/tokens).
   activeIds = new Set(controls === 'tui' ? tuiIds : webIds);
-  for (const id of (manifest.hideControls || [])) { if (!activeIds.has(id)) warn(`hideControls lists unknown control "${id}".`); activeIds.delete(id); }
+  const lockedIds = new Set();
+  for (const id of (manifest.hideControls || [])) { if (!activeIds.has(id)) warn(`hideControls lists unknown control "${id}".`); else lockedIds.add(id); }
+
+  // Dial tier: how much of the built-in set the Deck exposes.
+  let exposed = null;
+  if (manifest.dials == null) warn('manifest.dials is not set (the Deck defaults to "standard"). Right-size it: "none" | "essential" | "standard" | "full" | [control ids]. See SKILL.md "Right-size the Deck".');
+  else if (Array.isArray(manifest.dials)) {
+    exposed = new Set();
+    for (const id of manifest.dials) { if (!activeIds.has(id)) warn(`manifest.dials lists unknown control "${id}".`); else exposed.add(id); }
+    if (!exposed.size) warn('manifest.dials is an empty list; that equals "none". Write "none" if that is the intent.');
+  } else if (!TIER_NAMES.includes(manifest.dials)) err(`manifest.dials must be one of ${TIER_NAMES.join(' | ')} or an array of control ids (got ${JSON.stringify(manifest.dials)}).`);
+  else if (manifest.dials === 'full') exposed = new Set(activeIds);
+  else if (TIERS && TIERS[controls] && TIERS[controls][manifest.dials]) exposed = new Set(TIERS[controls][manifest.dials]);
+  if (exposed == null && TIERS && TIERS[controls]) exposed = new Set(TIERS[controls].standard);
+  if (exposed) { for (const id of lockedIds) exposed.delete(id); }
+  if (manifest.hidePresets != null && manifest.hidePresets !== true && manifest.hidePresets !== false && !Array.isArray(manifest.hidePresets)) err('manifest.hidePresets must be true or an array of preset names.');
+  const nExposed = exposed ? [...exposed].filter((id) => !['warmth', 'energy', 'mode'].includes(id)).length : null;
+  if (exposed) info.push(`deck: dials ${Array.isArray(manifest.dials) ? '[custom list]' : (manifest.dials || 'standard (default)')} · ${nExposed} built-in dial(s) exposed${lockedIds.size ? ` · locked: ${[...lockedIds].join(', ')}` : ''}${manifest.hidePresets === true ? ' · built-in presets hidden' : ''}`);
+  if (exposed && nExposed === 0 && (manifest.hidePresets === true || manifest.hidePresets == null) && manifest.dials !== 'none' && !Array.isArray(manifest.dials)) warn('Every built-in dial is hidden; set "dials": "none" instead of hiding them one by one.');
 
   const extra = manifest.extraControls || [];
   const validTypes = ['range', 'select', 'segment', 'toggle', 'font', 'color', 'text'];
@@ -119,9 +142,13 @@ if (manifest) {
     if (!c.var) warn(`extraControls "${c.id}" has no "var"; only scripts (PT.tokens()) can read it, CSS cannot.`);
     else if (![...templates.values()].some((t) => t.includes(c.var))) warn(`extraControls "${c.id}" sets ${c.var} but no variant references it.`);
   }
+  if (extra.length > 8) warn(`${extra.length} extraControls. Custom dials should be the few things this prototype's user will actually want to tune; fold the rest into variant defaults.`);
   const checkTokenKeys = (obj, where) => { for (const k of Object.keys(obj || {})) if (!activeIds.has(k)) warn(`${where} sets unknown control "${k}" (it will be ignored).`); };
   checkTokenKeys(manifest.defaults, 'manifest.defaults');
-  for (const [name, p] of Object.entries(manifest.presets || {})) checkTokenKeys(p, `preset "${name}"`);
+  for (const [name, p] of Object.entries(manifest.presets || {})) {
+    checkTokenKeys(p, `preset "${name}"`);
+    for (const k of Object.keys(p || {})) if (lockedIds.has(k)) warn(`preset "${name}" sets "${k}", which hideControls locks; presets never move locked dials, so that key is ignored.`);
+  }
 
   if (!Array.isArray(manifest.variants) || !manifest.variants.length) err('manifest.variants must be a non-empty array.');
   else {

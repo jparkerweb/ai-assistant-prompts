@@ -34,9 +34,11 @@
   "kind": "web",
   "brief": "Replace this with the design question this prototype answers, who it is for, and what 'good' looks like.",
   "controls": "web",
+  "dials": "standard",
   "defaults": {},
   "extraControls": [],
   "hideControls": [],
+  "hidePresets": [],
   "presets": {},
   "variants": [
     {
@@ -98,7 +100,7 @@
 
 
 <!-- ======================= 3. HARNESS (do not edit) ======================= -->
-<!-- pt-harness v1.0.0 -->
+<!-- pt-harness v1.1.0 -->
 <style id="pt-deck-css">
   html, body { margin: 0; height: 100%; }
   body { background: #e9ebef; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
@@ -162,6 +164,7 @@
   .pt-row label:hover { color: #fff; }
   .pt-row input[type=range] { width: 100%; margin: 0; accent-color: #6ea8fe; height: 18px; }
   .pt-row select { width: 100%; background: #0f1217; border: 1px solid #2b313c; border-radius: 6px; padding: 3px 4px; font-size: 11px; grid-column: 2 / span 2; }
+  .pt-screen-select { width: 100%; margin-top: 6px; background: #0f1217; border: 1px solid #2b313c; border-radius: 8px; padding: 4px 6px; font-size: 11px; color: #e6e9ef; }
   .pt-row input[type=color] { width: 100%; height: 22px; padding: 0; border: 1px solid #2b313c; border-radius: 6px; background: #0f1217; grid-column: 2 / span 2; }
   .pt-row .pt-seg { grid-column: 2 / span 2; }
   .pt-row .pt-switch { grid-column: 2 / span 2; justify-self: start; }
@@ -213,7 +216,7 @@
 <script id="pt-harness">
 (function () {
 'use strict';
-const DECK_VERSION = '1.0.0';
+const DECK_VERSION = '1.1.0';
 const HANDOFF_SCHEMA = 'ai-assist-prototype/handoff@1';
 
 /* ------------------------------------------------------------------ utils */
@@ -371,15 +374,36 @@ const TUI_CONTROLS = [
   { id: 'tuiScanlines', group: 'Terminal', label: 'CRT scanlines', type: 'toggle', default: false }
 ];
 const VALID_TYPES = ['range', 'select', 'segment', 'toggle', 'font', 'color', 'text'];
-const hidden = new Set(manifest.hideControls || []);
-const CONTROLS = (controlSetName === 'tui' ? TUI_CONTROLS : WEB_CONTROLS).filter((c) => !hidden.has(c.id));
-for (const c of (manifest.extraControls || [])) {
-  if (!c || !c.id || CONTROLS.some((x) => x.id === c.id)) continue;
-  if (!VALID_TYPES.includes(c.type)) { console.warn('[ai-assist-prototype] extraControl "' + c.id + '" has unknown type "' + c.type + '", skipped'); continue; }
-  CONTROLS.push(Object.assign({ group: 'Custom', label: c.id }, c, { custom: true }));
+/* Dial tiers: manifest.dials picks how much of the built-in set the Deck exposes (default "standard").
+   Written as strict JSON so validate-prototype.mjs can read the same lists from the harness. */
+const TIERS = {"web":{"none":["mode"],"essential":["warmth","energy","fontDisplay","fontBody","mode","accentHue","radius","density"],"standard":["warmth","energy","fontDisplay","fontBody","fontSize","typeScale","mode","accentHue","accentSat","accentLight","neutralHue","radius","borderWidth","elevation","density","containerWidth"]},"tui":{"none":[],"essential":["tuiTheme","tuiFont","tuiFontSize","tuiBorders"],"standard":["tuiTheme","tuiAccentHue","tuiFont","tuiFontSize","tuiLineHeight","tuiCols","tuiRows","tuiBorders","tuiCursor","tuiChrome"]}};
+const BUILTIN_CONTROLS = controlSetName === 'tui' ? TUI_CONTROLS : WEB_CONTROLS;
+const DIALS = manifest.dials == null ? 'standard' : manifest.dials;
+let tierIds;
+if (Array.isArray(DIALS)) tierIds = new Set(DIALS.map(String));
+else if (DIALS === 'full') tierIds = new Set(BUILTIN_CONTROLS.map((c) => c.id));
+else {
+  const tier = TIERS[controlSetName][DIALS];
+  if (!tier) console.warn('[ai-assist-prototype] manifest.dials "' + DIALS + '" is unknown (use none | essential | standard | full | [ids]); using "standard"');
+  tierIds = new Set(tier || TIERS[controlSetName].standard);
 }
-const ctrlById = (id) => CONTROLS.find((c) => c.id === id);
-const CONTROL_DEFAULTS = {}; for (const c of CONTROLS) CONTROL_DEFAULTS[c.id] = c.default;
+const hidden = new Set(manifest.hideControls || []);
+// CONTROLS = what the Deck renders (built-ins at the chosen tier minus hideControls, plus every extraControl).
+// ALL_CONTROLS = every definition, hidden ones included, so defaults, labels and fonts keep working for locked dials.
+const CONTROLS = BUILTIN_CONTROLS.filter((c) => tierIds.has(c.id) && !hidden.has(c.id));
+const ALL_CONTROLS = BUILTIN_CONTROLS.slice();
+for (const c of (manifest.extraControls || [])) {
+  if (!c || !c.id || ALL_CONTROLS.some((x) => x.id === c.id)) continue;
+  if (!VALID_TYPES.includes(c.type)) { console.warn('[ai-assist-prototype] extraControl "' + c.id + '" has unknown type "' + c.type + '", skipped'); continue; }
+  const def = Object.assign({ group: 'Custom', label: c.id }, c, { custom: true });
+  CONTROLS.push(def); ALL_CONTROLS.push(def);
+}
+const ctrlById = (id) => ALL_CONTROLS.find((c) => c.id === id);
+const isVisible = (id) => CONTROLS.some((c) => c.id === id);
+const CONTROL_DEFAULTS = {}; for (const c of ALL_CONTROLS) CONTROL_DEFAULTS[c.id] = c.default;
+// HAS_DIALS: anything tunable beyond the light/dark toggle. When false the Deck drops presets, sync, snapshots and reset.
+const HAS_DIALS = CONTROLS.some((c) => c.id !== 'mode');
+const hidePresets = manifest.hidePresets === true ? true : new Set(Array.isArray(manifest.hidePresets) ? manifest.hidePresets : []);
 
 /* -------------------------------------------------------------- presets */
 const BUILTIN_PRESETS = KIND === 'tui' ? {
@@ -399,7 +423,12 @@ const BUILTIN_PRESETS = KIND === 'tui' ? {
   'Midnight':  { mode: 'dark', fontDisplay: 'Outfit', fontBody: 'Inter', accentHue: 265, accentSat: 85, accentLight: 66, neutralHue: 250, neutralSat: 14, surfaceTint: 0.6, radius: 12, elevation: 3, motion: 1.2 },
   'Mono':      { fontDisplay: 'JetBrains Mono', fontBody: 'IBM Plex Mono', accentSat: 0, accentLight: 22, neutralSat: 0, radius: 0, borderWidth: 1.5, elevation: 0, typeScale: 1.2, weightDisplay: 700 }
 };
-const PRESETS = Object.assign({}, BUILTIN_PRESETS, manifest.presets || {});
+// hidePresets: true drops every built-in chip (manifest presets stay); an array drops the named ones from either source.
+const PRESETS = {};
+for (const [name, p] of Object.entries(BUILTIN_PRESETS)) if (hidePresets !== true && !hidePresets.has(name)) PRESETS[name] = p;
+for (const [name, p] of Object.entries(manifest.presets || {})) if (hidePresets === true || !hidePresets.has(name)) PRESETS[name] = p; else delete PRESETS[name];
+// hideControls locks a dial at its default: no row, and neither presets nor macros move it. Dials merely left out by the tier stay reachable through presets and the Feel macros.
+const locked = (id) => hidden.has(id);
 
 /* --------------------------------------------------------------- macros */
 const MACROS = {
@@ -424,7 +453,10 @@ try {
   if (saved && typeof saved === 'object') {
     const fresh = freshState();
     state = Object.assign(fresh, saved, { deck: Object.assign(fresh.deck, saved.deck || {}), macros: Object.assign(fresh.macros, saved.macros || {}), tokens: fresh.tokens, preset: Object.assign(fresh.preset, saved.preset || {}) });
-    for (const v of manifest.variants) state.tokens[v.id] = Object.assign({}, fresh.tokens[v.id], (saved.tokens || {})[v.id] || {});
+    for (const v of manifest.variants) {
+      state.tokens[v.id] = Object.assign({}, fresh.tokens[v.id], (saved.tokens || {})[v.id] || {});
+      for (const id of hidden) if (id in fresh.tokens[v.id]) state.tokens[v.id][id] = fresh.tokens[v.id][id]; // locked dials always sit at their defaults
+    }
     if (!manifest.variants.some((v) => v.id === state.v)) state.v = manifest.variants[0].id;
     state.pins = Array.isArray(saved.pins) ? saved.pins : []; state.snaps = Array.isArray(saved.snaps) ? saved.snaps : [];
     state.annotate = false;
@@ -644,7 +676,7 @@ function mount() {
   }
   try { location.hash = 'v=' + encodeURIComponent(v.id); } catch (e) { /* ignore */ }
 }
-function fontLabelsInUse(t) { const out = []; for (const c of CONTROLS) if (c.type === 'font') out.push(t[c.id]); return out; }
+function fontLabelsInUse(t) { const out = []; for (const c of ALL_CONTROLS) if (c.type === 'font') out.push(t[c.id]); return out; }
 function applyTokens() {
   if (!frameDoc) return; const t = currentTokens(); const vars = derive(t); const root = frameDoc.documentElement;
   for (const k of Object.keys(vars)) root.style.setProperty(k, vars[k]);
@@ -696,10 +728,10 @@ function buildDeck() {
       el('button', { class: 'pt-btn', text: 'JSON', title: 'Copy the handoff JSON only', onclick: () => exportHandoff('json') }),
       el('button', { class: 'pt-btn', text: 'View', title: 'Show the handoff in a window (manual copy)', onclick: () => showModal(buildHandoffText()) })
     ]),
-    el('div', { class: 'pt-actions' }, [
+    HAS_DIALS ? el('div', { class: 'pt-actions' }, [
       el('button', { class: 'pt-btn', text: '+ Snapshot', title: 'Save the current variant + dials to compare later (Shift+S)', onclick: () => addSnapshot() }),
       el('button', { class: 'pt-btn', text: 'Reset dials', title: 'Reset dials to this variant\'s defaults' + (state.sync ? ' (all variants while Sync is on)' : ''), onclick: () => resetTokens() })
-    ]),
+    ]) : null,
     ui.status = el('div', { class: 'pt-status' }, [ui.statusL = el('span', { text: '' }), el('span', { text: 'deck v' + DECK_VERSION })])
   ]);
   deck.append(head, body, foot);
@@ -708,7 +740,8 @@ function buildDeck() {
 function renderAll() { renderHelp(); renderNav(); renderToolbar(); renderPresets(); renderGroups(); renderAnnotateBox(); renderPins(); renderNotes(); renderSnaps(); setCollapsed(state.deck.collapsed, true); placeDeck(); }
 function renderHelp() {
   ui.help.style.display = state.deck.help ? '' : 'none'; if (!state.deck.help) return;
-  ui.help.innerHTML = '<b>How to use this prototype</b><ol><li>Flip variants with <kbd>←</kbd> <kbd>→</kbd> (structure differs per variant).</li><li>Tune the feel with presets and dials; try the viewport sizes' + (KIND === 'tui' ? '' : ' and light/dark') + '.</li><li>Type notes, or click 📍 then click any element to pin a comment.</li><li>Press <b>Export to LLM</b> and paste the block into your AI agent.</li></ol><div style="margin-top:4px;color:#8d96a5">Shortcuts: <kbd>`</kbd> collapse · <kbd>[</kbd> <kbd>]</kbd> screens · <kbd>Shift</kbd>+<kbd>A</kbd> annotate · <kbd>Shift</kbd>+<kbd>E</kbd> export · <kbd>Shift</kbd>+<kbd>S</kbd> snapshot · double-click a dial label to reset it.</div>';
+  const tune = HAS_DIALS ? 'Tune the feel with ' + (Object.keys(PRESETS).length ? 'presets and ' : '') + 'dials; try the viewport sizes' + (isVisible('mode') ? ' and light/dark' : '') + '.' : 'Try the viewport sizes' + (isVisible('mode') ? ' and light/dark' : '') + '.';
+  ui.help.innerHTML = '<b>How to use this prototype</b><ol><li>Flip variants with <kbd>←</kbd> <kbd>→</kbd> (structure differs per variant).</li><li>' + tune + '</li><li>Type notes, or click 📍 then click any element to pin a comment.</li><li>Press <b>Export to LLM</b> and paste the block into your AI agent.</li></ol><div style="margin-top:4px;color:#8d96a5">Shortcuts: <kbd>`</kbd> collapse · <kbd>[</kbd> <kbd>]</kbd> screens · <kbd>Shift</kbd>+<kbd>A</kbd> annotate · <kbd>Shift</kbd>+<kbd>E</kbd> export' + (HAS_DIALS ? ' · <kbd>Shift</kbd>+<kbd>S</kbd> snapshot · double-click a dial label to reset it' : '') + '.</div>';
 }
 function renderNav() {
   const v = currentVariant(); const i = manifest.variants.indexOf(v); const n = manifest.variants.length;
@@ -721,9 +754,16 @@ function renderNav() {
   if (v.thesis) ui.nav.append(el('div', { class: 'pt-thesis', text: v.thesis }));
   const sc = screensOf(v);
   if (sc.length > 1) {
-    const cur = currentScreen(); const seg = el('div', { class: 'pt-seg', style: 'margin-top:6px' });
-    for (const s of sc) seg.append(el('button', { text: s.name || s.id, 'aria-pressed': String(s.id === cur), onclick: () => setScreen(s.id) }));
-    ui.nav.append(seg);
+    const cur = currentScreen();
+    if (sc.length > 5) { // many screens (a long flow): a select reads better than a crowded segment
+      const sel = el('select', { class: 'pt-screen-select', title: 'Screen ([ and ] keys)' });
+      sc.forEach((s, i) => sel.append(el('option', { value: s.id, text: (i + 1) + '. ' + (s.name || s.id), selected: s.id === cur ? '' : null })));
+      sel.addEventListener('change', () => setScreen(sel.value)); ui.nav.append(sel);
+    } else {
+      const seg = el('div', { class: 'pt-seg', style: 'margin-top:6px' });
+      for (const s of sc) seg.append(el('button', { text: s.name || s.id, 'aria-pressed': String(s.id === cur), onclick: () => setScreen(s.id) }));
+      ui.nav.append(seg);
+    }
   }
 }
 function renderToolbar() {
@@ -733,10 +773,10 @@ function renderToolbar() {
   ui.toolbar.append(seg);
   const modeCtrl = ctrlById('mode');
   if (modeCtrl) ui.toolbar.append(el('button', { class: 'pt-icon-btn', title: 'Toggle light / dark', text: currentTokens().mode === 'dark' ? '☾' : '☀', onclick: () => setToken('mode', currentTokens().mode === 'dark' ? 'light' : 'dark') }));
-  ui.toolbar.append(el('button', { class: 'pt-icon-btn', title: 'Sync dials across variants: ' + (state.sync ? 'on' : 'off'), text: '🔗', 'aria-pressed': String(state.sync), onclick: () => { state.sync = !state.sync; save(); renderToolbar(); toast('Dial sync ' + (state.sync ? 'on: changes apply to every variant' : 'off: changes apply to this variant only')); } }));
+  if (HAS_DIALS) ui.toolbar.append(el('button', { class: 'pt-icon-btn', title: 'Sync dials across variants: ' + (state.sync ? 'on' : 'off'), text: '🔗', 'aria-pressed': String(state.sync), onclick: () => { state.sync = !state.sync; save(); renderToolbar(); toast('Dial sync ' + (state.sync ? 'on: changes apply to every variant' : 'off: changes apply to this variant only')); } }));
 }
 function renderPresets() {
-  ui.presets.innerHTML = ''; const names = Object.keys(PRESETS); if (!names.length) return;
+  ui.presets.innerHTML = ''; const names = Object.keys(PRESETS); if (!names.length || !HAS_DIALS) return;
   const cur = state.preset[state.v]; const chips = el('div', { class: 'pt-chips' });
   for (const name of names) chips.append(el('button', { class: 'pt-chip', text: name, 'aria-pressed': String(cur === name && !presetModified()), title: Object.keys(PRESETS[name]).length ? Object.keys(PRESETS[name]).map((k) => k + ': ' + PRESETS[name][k]).join(', ') : 'Variant defaults', onclick: () => applyPreset(name) }));
   ui.presets.append(el('div', { class: 'pt-h' }, [el('span', { text: 'Presets' }), el('span', { class: 'pt-mini', text: cur ? (cur + (presetModified() ? ' · modified' : '')) : 'custom' })]), chips);
@@ -744,17 +784,23 @@ function renderPresets() {
 function presetModified() {
   const name = state.preset[state.v]; if (!name || !PRESETS[name]) return false;
   const base = Object.assign({}, variantDefaults(state.v), PRESETS[name]); const t = currentTokens();
-  return CONTROLS.some((c) => !c.macro && String(t[c.id]) !== String(base[c.id]));
+  return ALL_CONTROLS.some((c) => !c.macro && !locked(c.id) && String(t[c.id]) !== String(base[c.id]));
 }
 function renderGroups() {
   ui.groups.innerHTML = ''; const t = currentTokens(); const groups = [];
-  for (const c of CONTROLS) if (!groups.includes(c.group)) groups.push(c.group);
+  // The light/dark toggle lives in the toolbar, so a Color group holding only "mode" would be a duplicate row: skip it.
+  const rowsOf = (g) => CONTROLS.filter((x) => x.group === g && !(x.id === 'mode' && CONTROLS.filter((y) => y.group === g).length === 1));
+  for (const c of CONTROLS) if (!groups.includes(c.group) && rowsOf(c.group).length) groups.push(c.group);
+  const total = groups.reduce((n, g) => n + rowsOf(g).length, 0);
   for (const g of groups) {
-    const open = state.deck.open[g] != null ? state.deck.open[g] : (g === 'Feel' || g === 'Theme' || g === 'Type');
+    const gRows = rowsOf(g);
+    // Small decks open every group; larger ones open Feel/Theme/Type plus any group holding prototype-specific (custom) dials.
+    const defaultOpen = total <= 8 || g === 'Feel' || g === 'Theme' || g === 'Type' || gRows.some((c) => c.custom);
+    const open = state.deck.open[g] != null ? state.deck.open[g] : defaultOpen;
     const det = el('details', { class: 'pt-group', open: open ? '' : null, ontoggle: (e) => { state.deck.open[g] = e.target.open; save(); } });
-    det.append(el('summary', { text: g }));
+    det.append(el('summary', {}, [el('span', {}, [el('span', { text: g }), el('span', { class: 'pt-mini', style: 'margin-left:6px', text: String(gRows.length) })])]));
     const rows = el('div', { class: 'pt-rows' });
-    for (const c of CONTROLS.filter((x) => x.group === g)) { rows.append(controlRow(c, c.macro ? state.macros[c.id] : t[c.id])); if (c.hint) rows.append(el('div', { class: 'pt-macro-hint' }, [el('span', { text: c.hint[0] }), el('span', { text: c.hint[1] })])); }
+    for (const c of gRows) { rows.append(controlRow(c, c.macro ? state.macros[c.id] : t[c.id])); if (c.hint) rows.append(el('div', { class: 'pt-macro-hint' }, [el('span', { text: c.hint[0] }), el('span', { text: c.hint[1] })])); }
     det.append(rows); ui.groups.append(det);
   }
 }
@@ -856,15 +902,16 @@ function showModal(text) {
 /* -------------------------------------------------------------- actions */
 function targets() { return state.sync ? manifest.variants.map((v) => v.id) : [state.v]; }
 function setToken(id, value, opts) {
-  const c = ctrlById(id); if (!c) return;
+  const c = ctrlById(id); if (!c || locked(id)) return;
   for (const vid of targets()) state.tokens[vid][id] = value;
   save(); applyTokens();
   if (!(opts && opts.silent)) { syncRow(id); renderPresets(); if (id === 'mode') renderToolbar(); }
 }
 function setMacro(id, v) {
+  if (!isVisible(id)) return;
   state.macros[id] = v; const mapped = MACROS[id] ? MACROS[id](v) : {};
-  for (const vid of targets()) for (const k of Object.keys(mapped)) if (ctrlById(k)) state.tokens[vid][k] = mapped[k];
-  save(); applyTokens(); for (const k of Object.keys(mapped)) syncRow(k); renderPresets();
+  for (const vid of targets()) for (const k of Object.keys(mapped)) if (ctrlById(k) && !locked(k)) state.tokens[vid][k] = mapped[k];
+  save(); applyTokens(); syncRow(id); for (const k of Object.keys(mapped)) syncRow(k); renderPresets();
 }
 function syncRow(id) {
   const row = ui.groups.querySelector('.pt-row[data-id="' + CSS.escape(id) + '"]'); if (!row) return; const c = ctrlById(id); const v = c.macro ? state.macros[id] : currentTokens()[id];
@@ -880,7 +927,8 @@ function refreshRows() { for (const c of CONTROLS) syncRow(c.id); }
 function resetControl(c) { if (c.macro) setMacro(c.id, c.default); else setToken(c.id, variantDefaults(state.v)[c.id]); toast(c.label + ' reset'); }
 function applyPreset(name) {
   const p = PRESETS[name]; if (!p) return;
-  for (const vid of targets()) { state.tokens[vid] = Object.assign({}, variantDefaults(vid), p); state.preset[vid] = name; }
+  const open = {}; for (const k of Object.keys(p)) if (ctrlById(k) && !locked(k)) open[k] = p[k]; // locked dials stay put
+  for (const vid of targets()) { state.tokens[vid] = Object.assign({}, variantDefaults(vid), open); state.preset[vid] = name; }
   save(); applyTokens(); refreshRows(); renderPresets(); renderToolbar(); toast('Preset: ' + name);
 }
 function resetTokens() {
@@ -979,7 +1027,7 @@ function layoutPins() {
 /* --------------------------------------------------------------- export */
 function buildHandoff() {
   const v = currentVariant(); const i = manifest.variants.indexOf(v); const t = currentTokens(); const d = variantDefaults(v.id); const vars = derive(t);
-  const changes = CONTROLS.filter((c) => !c.macro && String(t[c.id]) !== String(d[c.id])).map((c) => ({ id: c.id, label: c.label, from: fmtVal(c, d[c.id]), to: fmtVal(c, t[c.id]) }));
+  const changes = ALL_CONTROLS.filter((c) => !c.macro && String(t[c.id]) !== String(d[c.id])).map((c) => ({ id: c.id, label: c.label, from: fmtVal(c, d[c.id]), to: fmtVal(c, t[c.id]) }));
   const presetName = state.preset[v.id] || null;
   const file = (() => { try { return decodeURIComponent(location.pathname.split('/').pop() || '') || null; } catch (e) { return null; } })();
   const custom = {}; for (const c of CONTROLS) if (c.custom) custom[c.id] = t[c.id];
@@ -987,7 +1035,7 @@ function buildHandoff() {
   return {
     schema: HANDOFF_SCHEMA, deckVersion: DECK_VERSION, exportedAt: new Date().toISOString(),
     instructions: 'The user reviewed this prototype and chose the variant in "decision". Rebuild or implement using that variant\'s structure, the "tokens" (or the resolved "css" variables), and honor "notes" and "pins". "changes" lists what the user moved away from the variant defaults.',
-    prototype: { id: manifest.id, name: manifest.name, file, kind: KIND, brief: manifest.brief || null },
+    prototype: { id: manifest.id, name: manifest.name, file, kind: KIND, brief: manifest.brief || null, dials: DIALS, exposedDials: CONTROLS.filter((c) => !c.macro).map((c) => c.id), lockedDials: [...hidden].filter((id) => ctrlById(id)) },
     decision: { variantId: v.id, variantName: v.name || v.id, thesis: v.thesis || null, index: i + 1, of: manifest.variants.length, screen: currentScreen() },
     preset: { name: presetName, modified: presetName ? presetModified() : null },
     mode: KIND === 'tui' ? null : (t.mode || 'light'), viewport: state.viewport, macros: clone(state.macros),
@@ -1004,7 +1052,7 @@ function buildHandoffText() {
   L.push('Prototype: ' + h.prototype.name + (h.prototype.file ? ' (' + h.prototype.file + ')' : '') + ' · ' + (h.prototype.kind === 'tui' ? 'TUI' : 'web'));
   L.push('Decision: variant ' + h.decision.variantId + ' "' + h.decision.variantName + '" (' + h.decision.index + ' of ' + h.decision.of + ')' + (h.decision.screen ? ' · screen: ' + h.decision.screen : '') + (h.decision.thesis ? '\n  thesis: ' + h.decision.thesis : ''));
   L.push('Look: preset ' + (h.preset.name ? h.preset.name + (h.preset.modified ? ' (modified)' : '') : 'custom') + (h.mode ? ' · mode ' + h.mode : '') + ' · viewport ' + h.viewport);
-  L.push(h.changes.length ? 'Changed from variant defaults (' + h.changes.length + '): ' + h.changes.map((c) => c.label + ' ' + c.from + '→' + c.to).join(', ') : 'Dials: all at variant defaults');
+  L.push(h.changes.length ? 'Changed from variant defaults (' + h.changes.length + '): ' + h.changes.map((c) => c.label + ' ' + c.from + '→' + c.to).join(', ') : (HAS_DIALS ? 'Dials: all at variant defaults' : 'Dials: none exposed (fixed look)'));
   if (Object.keys(h.custom).length) L.push('Custom controls: ' + Object.keys(h.custom).map((k) => k + '=' + h.custom[k]).join(', '));
   if (h.notes) L.push('Notes: ' + h.notes.replace(/\n/g, '\n  '));
   if (h.pins.length) { L.push('Pins (' + h.pins.length + '):'); for (const p of h.pins) L.push('  ' + p.n + '. [' + p.variantId + (p.screen ? '/' + p.screen : '') + '] ' + p.selector + (p.text ? ' "' + p.text + '"' : '') + ': ' + p.note); }
@@ -1043,8 +1091,8 @@ document.addEventListener('keydown', onKey);
 const missing = manifest.variants.filter((v) => !document.querySelector('template[data-variant="' + CSS.escape(v.id) + '"]')).map((v) => v.id);
 buildDeck(); mount(); placeDeck();
 if (missing.length) setStatus('⚠ missing template for: ' + missing.join(', '), 'err');
-else setStatus(manifest.variants.length + ' variant' + (manifest.variants.length === 1 ? '' : 's') + ' · ' + CONTROLS.length + ' dials', '');
-window.__PT__ = { version: DECK_VERSION, manifest, get state() { return state; }, handoff: buildHandoff, handoffText: buildHandoffText, setToken, setMacro, applyPreset, go: setScreen, variant(id) { if (manifest.variants.some((v) => v.id === id)) { state.v = id; save(); mount(); renderAll(); refreshRows(); } return mountReady; }, ready: () => mountReady, frame: () => frame, controls: CONTROLS, presets: PRESETS };
+else { const nd = CONTROLS.filter((c) => !c.macro && c.id !== 'mode').length; setStatus(manifest.variants.length + ' variant' + (manifest.variants.length === 1 ? '' : 's') + ' · ' + (nd ? nd + ' dial' + (nd === 1 ? '' : 's') : 'no dials'), ''); }
+window.__PT__ = { version: DECK_VERSION, manifest, get state() { return state; }, handoff: buildHandoff, handoffText: buildHandoffText, setToken, setMacro, applyPreset, go: setScreen, variant(id) { if (manifest.variants.some((v) => v.id === id)) { state.v = id; save(); mount(); renderAll(); refreshRows(); } return mountReady; }, ready: () => mountReady, frame: () => frame, controls: CONTROLS, allControls: ALL_CONTROLS, dials: DIALS, locked: [...hidden], presets: PRESETS };
 console.info('%cai-assist-prototype%c deck v' + DECK_VERSION + ' · ' + manifest.variants.length + ' variant(s) · window.__PT__ for scripting', 'font-weight:bold', '');
 })();
 </script>

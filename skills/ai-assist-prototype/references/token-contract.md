@@ -1,6 +1,6 @@
 # Token contract: manifest, dials, CSS variables, and the PT bridge
 
-This is the reference for everything a variant can rely on from the harness (`assets/template.html`, deck v1.0.0). Read it when you author variants, add custom controls, or script against a prototype with browser tools.
+This is the reference for everything a variant can rely on from the harness (`assets/template.html`, deck v1.1.0). Read it when you author variants, add custom controls, or script against a prototype with browser tools.
 
 **Contents**
 
@@ -34,10 +34,12 @@ At runtime the Deck mounts the current variant into its **own iframe document**.
 | `kind` | `web` \| `tui` | `web` | Selects the derive function and base styles. TUI mode derives `data-mode` from the theme's background lightness. |
 | `brief` | string | none | The design question, audience, and what "good" looks like. Travels with every export, so write it for the agent that will read the handoff. |
 | `controls` | `web` \| `tui` | same as `kind` | Which built-in control set the Deck shows. Keep it equal to `kind`. |
-| `defaults` | partial token map | `{}` | Global default overrides applied before per-variant `tokens`. Use it to seed the prototype from a repo's DESIGN.md, Tailwind theme or CSS variables (accent hue, fonts, radius). |
-| `extraControls` | array | `[]` | Custom dials, see below. Appear in the Deck under their `group` (default "Custom"). |
-| `hideControls` | string[] | `[]` | Built-in control ids to remove from the Deck (they keep their default value). |
-| `presets` | `{ name: partial token map }` | `{}` | Extra preset chips. Merged over the built-ins; same name overrides. A preset is applied on top of the variant's defaults, not on top of the current state. |
+| `dials` | `none` \| `essential` \| `standard` \| `full` \| string[] | `standard` | How much of the built-in set the Deck exposes (see "Dial tiers" below). A string array is an explicit allowlist of built-in ids. Always set it deliberately; the validator warns when it is missing. |
+| `defaults` | partial token map | `{}` | Global default overrides applied before per-variant `tokens`. Use it to seed the prototype from a repo's DESIGN.md, Tailwind theme or CSS variables (accent hue, fonts, radius), and to fix the value of any dial the tier does not expose. |
+| `extraControls` | array | `[]` | Custom dials, see below. Appear in the Deck under their `group` (default "Custom"); groups holding custom dials open by default. Always shown, whatever the tier. |
+| `hideControls` | string[] | `[]` | Built-in control ids to **lock**: no row in the Deck, and neither presets nor the Feel macros move them, so they sit at `defaults` / `variant.tokens` for good (a mandated brand font, a fixed base size). Different from a dial the tier merely leaves out, which presets and macros can still move. |
+| `presets` | `{ name: partial token map }` | `{}` | Extra preset chips. Merged over the built-ins; same name overrides. A preset is applied on top of the variant's defaults, not on top of the current state. Locked keys in a preset are ignored. |
+| `hidePresets` | `true` \| string[] | `[]` | `true` removes every built-in preset chip (your `presets` stay); an array removes the named ones. Presets are also hidden automatically when the tier exposes no dials. |
 | `fonts` | array of `{ label, stack, gf?, cat? }` | `[]` | Extra entries for the font pickers. `stack` is the CSS font-family value, `gf` the Google Fonts family string (e.g. `Inter:wght@300..900`) if it should be loaded, `cat` one of `sans`, `serif`, `mono`, `display`. |
 | `tuiThemes` | `{ name: { bg, fg, dim, accent, accent2, sel, border, ok, warn, err } }` | `{}` | Extra terminal palettes (hex). Missing keys fall back to "Default dark". |
 | `variants` | array | required, non-empty | See below. Order is the Deck order. |
@@ -61,6 +63,20 @@ At runtime the Deck mounts the current variant into its **own iframe document**.
 | `type` | `range` (needs `min`, `max`, optional `step`, `unit`), `select` / `segment` (need `options`: strings or `{ value, label }`), `toggle` (boolean), `font` (optional `cat` filter), `color` (hex), `text`. |
 | `default` | Required in practice; without it the dial starts empty. |
 | `var` | Optional CSS custom property name (`--x-sidebar-w`). When present the harness sets it on the variant document's `<html>` every time the value changes: `range` values get `unit` appended (degrees excepted), `toggle` becomes `"1"` / `"0"`, `font` becomes the font stack, everything else is the raw string. Without `var`, only scripts can read the value (`PT.tokens().id`), so reach for `PT.on('tokens', …)` in that case. |
+
+**Dial tiers (`manifest.dials`)**
+
+The Deck should be as big as the question, not as big as the harness. Pick the tier in the plan (SKILL.md, "Right-size the Deck"); `extraControls` are added on top of any tier, `hideControls` subtracts from it.
+
+| Tier | Web dials exposed | TUI dials exposed | Typical use |
+|---|---|---|---|
+| `none` | only the light/dark toggle in the toolbar; no groups, no presets, no sync, no snapshots, no reset | nothing (variant nav, viewports, notes, pins, export only) | structure-only comparisons, a single component with a fixed brand look, a throwaway sanity check |
+| `essential` | Feel (warmth, energy), Type (display font, body font), Color (mode, accent hue), Shape (radius), Space (density); 8 rows | theme, font, font size, border glyphs | a component, a widget, a small screen where feel matters but nobody will tune tracking |
+| `standard` (default) | essential + base size, type scale, accent sat/light, neutral hue, border width, elevation, container width; 16 rows, Feel/Type open, Color/Shape/Space collapsed | essential + accent override, line height, columns, rows, cursor, window chrome | a page or app screen, most prototypes |
+| `full` | all 27 (adds line height, tracking, weights, 2nd hue shift, neutral tint, surface depth, contrast, motion) | all 14 (adds bold headings, padding, cursor blink, scanlines) | design-system and brand explorations, dark-first passes, when the user is a designer who wants every knob |
+| `[ids]` | exactly the listed built-in ids | same | when a tier is almost right; e.g. `["mode", "accentHue", "radius", "density"]` |
+
+Decks with eight or fewer rows open every group; larger ones open Feel (or Theme), Type and any group holding custom dials. Dials a tier leaves out still exist: `defaults` and `variant.tokens` set them, presets and the Feel macros move them, and the export's `changes` lists them when they differ from the variant's defaults. `hideControls` is the stronger tool: a locked dial never moves.
 
 ## 3. Web control set
 
@@ -269,11 +285,11 @@ For agents with browser tools (Claude in Chrome, Playwright) verifying a prototy
 
 | Member | Purpose |
 |---|---|
-| `version`, `manifest`, `controls`, `presets` | read-only introspection |
+| `version`, `manifest`, `controls`, `allControls`, `dials`, `locked`, `presets` | read-only introspection: `controls` is what the Deck renders at the chosen tier, `allControls` every definition (locked and tier-trimmed included), `dials` the manifest tier, `locked` the `hideControls` ids |
 | `state` | live deck state (current variant `v`, per-variant `tokens`, `macros`, `viewport`, `notes`, `pins`, `snaps`, `sync`) |
 | `variant(id)` | switch variant; returns a Promise that resolves when the new document is parsed (mounting is asynchronous in Chrome) |
 | `ready()` | Promise for the current mount |
-| `setToken(id, value)`, `setMacro(id, value)`, `applyPreset(name)`, `go(screenId)` | same effects as using the Deck |
+| `setToken(id, value)`, `setMacro(id, value)`, `applyPreset(name)`, `go(screenId)` | same effects as using the Deck; `setToken` on a locked id and `setMacro` on a macro the tier does not expose are ignored, `setToken` on a tier-trimmed id works |
 | `handoff()` | the export object (schema `ai-assist-prototype/handoff@1`) |
 | `handoffText()` | the exact text that "Export to LLM" copies |
 | `frame()` | the current iframe element; `frame().contentDocument` is the variant document |

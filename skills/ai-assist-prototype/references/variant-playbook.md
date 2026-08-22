@@ -142,6 +142,7 @@ Run through this before handing the prototype over:
 8. No remote assets, no external scripts, validator reports zero errors and only intentional warnings.
 9. Scripts are small, in-memory, and free of errors in the Deck status line.
 10. Each variant has one signature element and no accidental decoration; the three generic AI looks appear only if the brief asked for them.
+11. The Deck matches the scope: `manifest.dials` is set on purpose (`none` for a structure-only check, `essential` for a component, `standard` for a screen, `full` for a design exploration), custom controls are the two or three things the user will actually tune, and anything that must not move is locked with `hideControls` and fixed in `defaults`.
 
 **When variants come out too similar**: keep the best one, and redo another with an explicit structural constraint written at the top of its template as a comment ("no cards, no grid: a single table is the page" or "sidebar navigation, detail always visible"). Two drafts that share a layout are one variant.
 
